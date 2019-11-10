@@ -1,0 +1,93 @@
+<h2><%= l(:customers_sla_report) %></h2>
+<h3>Period: from <span class="red"><%= @start_date %></span> until <span class="red"><%= @end_date %></span></h3>
+
+<div class="autoscroll">
+  <table class="list issues report_table" id="report_table">
+	<thead>
+      <th>&nbsp;</th>
+      <th>Project</th>
+      <th>Service</th>
+      <th>SLA(hrs)</th>
+      <th>Calls Received</th>
+      <th>
+        Solved at<br />
+        1st attempt or <br />
+        within 15 mins<br /></th>
+      <th>
+        Solved from<br />
+        5 mins - <br />
+        4 hours</th>
+      <th>
+        Solved from<br />
+        4 hours to <br />
+        1 day </th>
+      <th>
+        Solved in<br />
+        2 days
+      </th>
+      <th>Solved in <br />3 -13 days</th>
+      <th>Solved in <br />more then<br /> 13 days</th>
+      <th>Still pending</th>
+    </thead>
+    <tr>
+      <td>1</td>
+      <td>Customer Tickets</td>
+      <td><%= @project_name.first["name"] %></td>
+      <td><%= @sla.first["value"] %></td>
+      <td><%= @total.first["value"] %></td>
+      <td><%= @value_15m.first["value"] %></td>
+      <td><%= @value_4h.first["value"] %></td>
+      <td><%= @value_4h1d.first["value"] %></td>
+      <td><%= @value_2d.first["value"] %></td>
+      <td><%= @value_3d.first["value"] %></td>
+      <td><%= @value_13d.first["value"] %></td>
+      <td><%= @value_sp.first["value"] %></td>
+    </tr>
+  </table>
+  <br >
+  <h3>CALL PRIORITY</h3>
+  <table class="list issues report_table report_table_auto" >
+	<thead>
+      <th>Urgent</th>
+      <th>High</th>
+      <th>Immediate</th>
+      <th>Medium</th>
+      <th>Low</th>
+      <th>Normal</th>
+  </thead>
+  <tr>
+    <td><%= @urgent.first["value"] %></td>
+    <td><%= @high.first["value"] %></td>
+    <td><%= @immediate.first["value"] %></td>
+    <td><%= @medium.first["value"] %></td>
+    <td><%= @low.first["value"] %></td>
+    <td><%= @normal.first["value"] %></td>
+  </tr>
+  </table>
+  <br />
+  <h3 class="red">% within SLA: &nbsp;&nbsp;<%= @within_sla.to_f.round %>%</h3>
+  <br />
+  <h3>Problem Type breakdown</h3>
+  <table class="list issues report_table report_table_auto">
+    <thead>
+      <th>Problem name</th>
+      <th> % occurence</th>
+      <th> Count </th>
+    </thead>
+    <% @pt.each do |key|
+        if(key['name'].to_s.empty?)
+          key['name']="Others"
+        end
+      %>
+     <tr class="<%= cycle("odd", "even") %>">
+      <td><%= key['name'] %></td>
+      <td><%= key['value'] %>%</td>
+      <td><%= key['number'] %></td>
+     </tr>
+    <% end %>
+  </table>
+</div>
+<p class="other-formats">Also available in:
+  <span><%= link_to "PDF", generate_customers_reports_path(start_date: params[:start_date], end_date: params[:end_date], project_id: params[:project_id], format: :pdf), class: 'pdf' %></span>
+  <span><%= link_to "EXCEL", generate_customers_reports_path(start_date: params[:start_date], end_date: params[:end_date], project_id: params[:project_id], format: :xlsx), class: 'excel' %></span>
+</p>

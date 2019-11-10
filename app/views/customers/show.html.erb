@@ -1,0 +1,27 @@
+<div class="contextual">
+  <%= link_to(l(:button_edit), edit_customer_path(@customer), :class => 'icon icon-edit') %>
+	<% if User.current.allowed_to_globally?('activate_customers', {}) %>
+			 <% if @customer.active? %>
+					<%= link_to 'inactive', inactive_customer_path(@customer), class: 'icon icon-lock' %>
+			<% else %>
+					<%= link_to 'activate', active_customer_path(@customer), class: 'icon icon-unlock' %>
+			<% end %>
+		<% end %>
+
+
+  <%= delete_link @customer %>
+</div>
+
+<%= title [l(:customers_customer_plural), customers_path], @customer.customer_name %>
+
+<div class='form_align'>
+  <table>
+	<tr><td><strong>ID:</strong></td><td><%= @customer.id %></td></tr>
+  	<tr><td><strong><%= l(:customers_customer_name) %>:</strong></td><td><%= @customer.customer_name %></td></tr>
+  	<tr><td><strong><%= l(:customers_tel_number) %>:</strong></td><td><%= @customer.phone %></td></tr>
+  	<tr><td><strong><%= l(:customers_email_id) %>:</strong></td><td><%= @customer.email %></td></tr>
+  </table>
+
+
+	<%= customer_render_half_width_custom_fields_rows(@customer) %>
+</div>

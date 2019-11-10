@@ -1,0 +1,11 @@
+<%= title l(:mns_title_case_new) %>
+
+<div class="box tabular">
+	<%= labelled_form_for @helpdesk do |f| %>
+	<%= render :partial => 'form', :locals => { :f => f } %>
+	<p>
+	  <%= f.submit l(:button_create) %>
+	  <%= f.submit l(:button_create_and_continue), :name => 'continue' %>
+	</p>
+	<% end %>	
+</div>

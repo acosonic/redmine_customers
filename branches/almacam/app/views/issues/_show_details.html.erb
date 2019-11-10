@@ -1,0 +1,45 @@
+<%
+	## Load customer details
+	if @issue.customer_id != nil
+		@customer = Customer.find(@issue.customer_id)
+
+%>
+		<% if @customer.active? %>
+				<table class="attributes" style="border:1px dotted gray !important;background:rgba(255,255,255,0.3);">
+					<tbody>
+					<tr>
+						<td colspan=4"><strong><i><%= l(:customers_customer_details) %>:</i></strong>
+						</td>
+					<tr>
+						<th><%= l(:customers_redmine_cid) %></th>
+						<td><%= link_to @customer.id.to_s + " show", @customer %>
+						</td>
+					</tr>
+					<tr>
+						<th><%= l(:field_customer_name) %></th>
+						<td><%= @customer.customer_name  %>
+						</td>
+					</tr>
+					<tr>
+						<th><%= l(:field_tel_number) %></th>
+						<td><%= @customer.phone  %>
+						</td>
+						<th><%= l(:field_email) %></th>
+						<td><%= @customer.email  %></td>
+					</tr>
+					<tr>
+					<% @customer.visible_custom_field_values.each_with_index do |value, idx| %>
+					<% if idx % 2 == 0 %>
+								<th><%= value.custom_field.name %></th>
+								<td><%= value  %>	</td>
+					<% else  %>
+							<th><%= value.custom_field.name %></th>
+							<td><%= value  %>	</td>
+							</tr>		<tr>
+					<% end %>
+					<% end %>
+						</tr>
+						</tbody>
+				</table>
+		<% end %>
+<% end %>

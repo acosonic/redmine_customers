@@ -1,0 +1,8 @@
+api.customer do
+  api.id @customer.id
+
+  api.customers_customer_name  @customer.customer_name
+  api.customers_phone  @customer.phone
+  api.customers_email  @customer.email
+
+end

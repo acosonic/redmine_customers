@@ -1,0 +1,47 @@
+<table width="100%" id="customer_table">
+  <thead>
+    <tr>
+      <th></th>
+      <th><%= l(:customers_number) %></th>
+
+      <th><%= l(:field_customer_name_short) %></th>
+      <th><%= l(:field_email_short) %></th>
+      <th><%= l(:field_tel_number) %></th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @customers.each_with_index do |customer, index| %>
+      <tr class="<%= cycle("odd", "even") %>">
+        <td><%= radio_button_tag "customer_radio", "{ \"customer_id\" :"+customer.id.to_json + ", \"contact_info\" :"+customer.customer_name.to_json + ", \"customers_email\" :"+customer.email.to_json +  " }", nil , :id => nil %></td>
+        <td><%= index + 1 %></td>
+        <td><%= customer.customer_name %></td>
+        <td><%= customer.email %></td>
+        <td><%= customer.phone %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+<script type="text/javascript">
+//this javascript is rendered after form, so that's why it works!
+$("tr").not(':first').hover(
+  function () {
+    $(this).css("background","yellow");
+  },
+  function () {
+    $(this).css("background","");
+  }
+);
+
+
+$("customer_table").click(function(e){
+    alert("clicked");
+       var Elem = e.target;
+       if (Elem.nodeName=='tr'){
+//$("tr").click(function(){
+    $(this).find("input").prop("checked", true).trigger("click");
+    $(this).parent().find("tr").css("font-weight","normal");
+    $(this).css("font-weight","bold");
+    return false;
+}});
+
+</script>

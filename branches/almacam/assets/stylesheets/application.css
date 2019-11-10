@@ -1,0 +1,15 @@
+/*
+PLUGIN ICON
+*/
+#admin-menu a.customers-customers { background-image: url('../images/customers.png'); }
+#customers_icon { background-image: url('../images/customers.png') no-repeat; }
+
+.report_table,.report_table tr, .report_table td, .report_table th {
+	border:1px solid gray; 
+}
+.report_table_auto {
+  width:auto !important;
+}
+.red {
+  color:red;
+}

@@ -1,0 +1,78 @@
+# English strings go here for Rails i18n
+en:
+  # my_label: "My label"
+  customers_title_case_new: "HELPDESK - Customer Tickets"
+  customers_manage_customers: "Manage Customers"
+  customers_import_label: "Import CSV"
+  customers_delete_customer_label: "Delete"
+  customers_id: "ID"
+  customers_user_id: "User ID"
+  customers_customer_name: "Customer Name"
+  customers_tel_number: "Telephone number"
+  customers_email_id: "Email"
+  customers_company_name: "Company"
+  customers_subscriber_id: "Subscriber ID"
+  customers_tan_number: "TAN"
+  customers_npf_number: "NPF"
+  customers_paye_number: "PAYE"
+  customers_vat_number: "VAT"
+  customers_add_customer: "Add Customer"
+  customers_customer_plural: "Customers"
+  customers_new_customer: "New Customer"
+  customers_customers: "Customers"
+  customers_search_for_customers: "Search customer list"
+  customers_customer_contact: "Customer contact"
+  customers_label_customer_upload_notice: "Choose CSV file with customers"
+  customers_customer_upload_format: "Choose upload format"
+  customers_customer_upload_encoding: "Choose file encoding"
+  customers_customer_upload_splitter: "CSV file splitter"
+  customers_customer_upload_wrapper: "CSV file wrapper"
+  customers_customer_upload: "Upload CSV"
+  customers_import_match_columns: "Match import columns"
+  customers_submit: "Submit"
+  customers_customer_toplines: "Customers to be imported:"
+  customers_missing_imported_file: "Missing imported file!"
+  customers_cannot_save_import_file: "Cannot save import file."
+  customers_successfull_import: "Sucessfull import"
+  customers_import_results: "Import results"
+  customers_result_notice: "Import notices"
+  customers_import_failed: "Failed import"
+  customers_back: "Back"
+  customers_show: "Show"
+  customers_all_customers: "Show customers"
+  customers_customer_details: "Customer details"
+  customers_message_unique_filed_duplicated: "Duplicate user ID's found!"
+  customers_import_failed_rows: "Following rows were not imported!"
+  customers_query_customer: "Query Customer"
+  customers_label_customer_search: "Customer search parameters:"
+  customers_search_for_customers_button: "Choose Customer"
+  field_customer: "Customer"
+  field_user_id: 'User ID'
+  field_customer_id: "Customer ID"
+  field_tan_number: "TAN"
+  field_customer_name: 'Customer Name'
+  field_subscriber_id: "Subscriber ID"
+  field_tel_number: "Customer phone number"
+  field_email: 'Customer email'
+  field_email_id: 'Customer email'
+  field_company_name: 'Company name'
+  field_subscriber: 'Subscriber id'
+  field_tan_number: "TAN"
+  field_npf_number: "NPF"
+  field_paye_number: "PAYE"
+  field_vat_number: "VAT"
+  field_company_short: "Company"
+  field_email_short: "Email"
+  field_customer_name_short: 'Name'
+  field_tel_number: "Tel"
+  label_customer_plural: 'Customers'
+  field_phone: phone
+  label_customer_new: 'New customer'
+  label_customer_plural: Customers
+  customers_number: "No"
+  customers_contact_info: "Contact Info"
+  customers_helpdesk_title: "HELPDESK - Customer Tickets"
+  customers_redmine_cid: "Redmine Customer ID"
+  customers_sla_report: "customers SLA Report"
+  customers_customer_address: Customer address
+  mns_import_label: Import Customers

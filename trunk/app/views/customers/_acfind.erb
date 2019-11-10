@@ -1,0 +1,23 @@
+<h3 class="title"><%= l(:customers_search_for_customers) %></h3>
+
+  <p><%= label_tag 'user_search', l(:customers_label_customer_search) %><%= text_field_tag 'user_search', nil %></p>
+  <%= javascript_tag "observeSearchfield('user_search', null, '#{ escape_javascript autocomplete_for_customer_customers_path(:format => 'js')}')" %>
+
+  <div id="users_for_watcher">
+    <%= render 'customers/customers_table' %>
+  </div>
+
+ <p class="buttons">
+    <%= submit_tag l(:button_add), :name => nil, :onclick => "addToHelpdesk(this);" %>
+    <%= submit_tag l(:button_cancel), :name => nil, :onclick => "hideModal(this);", :type => 'button' %>
+ </p>
+
+ <script type="text/javascript">
+ function addToHelpdesk(customers_modal) {
+   var customer = $.parseJSON($("input[type='radio']:checked").val());
+   $("#customer_id").val(customer.customer_id);
+   $("#customer_email").val(customer.customers_email);
+   $("#contact_info").val(customer.contact_info);
+   hideModal(customers_modal);
+ }
+ </script>

@@ -1,0 +1,7 @@
+<p>
+  <label>
+    <%= l(:redmine_upwork_access_token) %>
+  </label>
+
+  <%= select_tag("settings[helpdesk_project_id]", options_for_select(Project.active.pluck(:name, :id), selected: settings['access_token']) ) %>
+</p>

@@ -1,0 +1,24 @@
+<div id="attributes" class="attributes">
+  <div class="splitcontent">
+      <div class="splitcontentleft">
+        <p>
+           <%= label_tag 'project_id', '*System' %>	
+              <%= select('project_id', nil, project_tree_options_for_select(@target_projects,:selected => Project.where(:id => "1")), :required => true) %>
+			  <p id="watchers_form"><label><%= l(:label_issue_watchers) %></label>
+			      <span id="watchers_inputs">
+
+			      </span>
+			      <span class="search_for_watchers">
+			      <%= link_to l(:mns_search_for_customers),
+			                  {:controller => 'customers', :action => 'search'},
+			                  :remote => true,
+			                  :method => 'get' %>
+			      </span>
+			  </p>
+        </p>
+      </div>
+      <div class="splitcontentright">
+	  	<p>This should actually be a custom field of issue Customer contact<%= text_field :customer_contact, :required => true, :size => 25, :label => l(:mns_customer_contact) %></p>
+      </div>
+  </div>
+</div>

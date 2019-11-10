@@ -1,0 +1,37 @@
+<% html_title t(:customers_import_label) -%>
+<% content_for :header_tags do %>
+    <%= stylesheet_link_tag 'importer', :plugin => 'customers' %>
+<% end %>
+<%= title l(:customers_import_match_columns) %>
+<%= form_tag({:action => 'result'}, {:multipart => true}) do %>
+    <fieldset class="box"><legend><%= t(:customers_import_match_columns) %></legend>
+    <% @headers.each_with_index do |column, idx| %>
+        <% next if column.to_s.blank? %>
+         <label class="tabular"><%= column %>:
+          <%= select_tag "fields_map[#{column}]", options_for_select( @attrs, column ) %>
+         </label>
+    <% end %>
+    </fieldset>
+
+    <%= submit_tag t(:customers_submit) %>
+<br/>
+<% end %>
+
+<hr/>
+<p>
+<%= t(:customers_customer_toplines, { :original_filename => @original_filename } ) %>
+</p>
+<table class="list">
+    <thead><tr>
+        <% @headers.each do |column| %>
+          <th><%= column %></th>
+        <% end %>
+    </tr></thead>
+    <tbody>
+    <% @samples.each do |issue| -%>
+    <tr class="<%= cycle("odd", "even") %>">
+        <% issue.each do |column| %><%= content_tag 'td', column[1] %><% end %>
+    </tr>
+    <% end %>
+    </tbody>
+</table>

@@ -1,0 +1,42 @@
+<%
+   ## Load customer details
+   if issue = @issue.new_record? ? @issue.customer_id : Issue.find_by_id(@issue.id)
+     @customer = Customer.find_by_id(issue.customer_id)
+     customer_info = @customer&.phone
+     customer_email = @customer&.email
+   else
+     customer_info = ""
+     customer_email = ""
+   end
+%>
+<div id="attributes" class="attributes">
+  <div class="splitcontent">
+    <div class="splitcontentleft">
+
+      <p id="customers_form"><label><%= l(:customers_query_customer) %></label>
+      <span id="customers_inputs">
+
+      </span>
+      <span>
+	<%= link_to ("<button>"+l(:customers_search_for_customers_button)+"</button>").html_safe, :controller => 'customers', :action => 'acfind',
+              :remote => true,
+              :method => 'get' %>
+      </span>
+      <p>
+        <input type="hidden" id="customer_id" value="" name="issue[customer_id]"><!-- //this field is to be the link between customer and a ticket -->
+        <label><%= l(:field_email) %></label>
+        <input type="text" id="customer_email" value="<%= customer_email %>" disabled="true">
+      </p>
+      <p>
+        <label><%= l(:customers_contact_info) %></label>
+        <input type="text" id="contact_info" value="<%= customer_info %>" disabled="true">
+      </p>
+    </div>
+  </div>
+</div>
+<script type="text/javascript">
+  //$("#issue_project_id").change(function() {
+  //console.log($(this).val());
+  //  document.location.href='projects/'+$(this).val()+'/issues/new';
+  //});
+</script>

@@ -1,0 +1,28 @@
+<h2>Helpdesk Reports</h2>
+<div id="query_form_content" class="hide-when-print">
+<%= form_tag('customers_reports/generate', method: :get) do-%>
+<fieldset id="filters" class="collapsible collapsed">
+  <legend onclick="toggleFieldset(this);">Report parameters</legend>
+  <div>
+	<p>
+       <%= label_tag 'project_id', '*System' %>	
+       <%= select_tag 'project_id', project_tree_options_for_select(Project.where("parent_id=172"),:selected => Project.where(:id => "197")) %>
+    </p>
+	<p id="start_date_area">
+	  <%= label_tag 'name', 'Start date' %>
+	  <%= text_field_tag :start_date, Time.now.months_since(-1).strftime("%Y-%m-%d") %>
+	  <%= calendar_for('start_date') %>
+	</p>
+	<p id="end_date_area">
+	  <%= label_tag 'name', 'End date'  %>&nbsp;&nbsp;
+	  <%= text_field_tag :end_date, Time.now.strftime("%Y-%m-%d") %>
+	  <%= calendar_for('end_date') %>
+	</p>
+    <p class="buttons hide-when-print">
+	<%= submit_tag "Generate report" %>
+	    <!--a href="#" class="icon icon-reload" onclick="javascript:">Clear</a-->
+	    </p>
+  </div>
+</fieldset>
+<% end-%>
+</div>

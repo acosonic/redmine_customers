@@ -1,0 +1,84 @@
+<?xml version="1.0"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+  xmlns:o="urn:schemas-microsoft-com:office:office"
+  xmlns:x="urn:schemas-microsoft-com:office:excel"
+  xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
+  xmlns:html="http://www.w3.org/TR/REC-html40">
+  <Worksheet ss:Name="Sheet1">
+    <Table>
+      <Row><Cell><Data ss:Type="String">Period: from <%= @start_date %> until <%= @end_date %></Data></Cell></Row>
+      <Row>
+        <Cell><Data ss:Type="String">#</Data></Cell>
+        <Cell><Data ss:Type="String">Project</Data></Cell>
+        <Cell><Data ss:Type="String">Service</Data></Cell>
+        <Cell><Data ss:Type="String">SLA(hrs)</Data></Cell>
+        <Cell><Data ss:Type="String">Calls Received</Data></Cell>
+        <Cell><Data ss:Type="String">Solved at 1st attempt or within 15 mins </Data></Cell>
+        <Cell><Data ss:Type="String">Solved from 5 mins - 4 hours</Data></Cell>
+        <Cell><Data ss:Type="String">Solved from 4 hours to 1 day </Data></Cell>
+        <Cell><Data ss:Type="String">Solved in 2 days</Data></Cell>
+        <Cell><Data ss:Type="String">Solved in 3 -13 days</Data></Cell>
+        <Cell><Data ss:Type="String">Solved in more then 13 days</Data></Cell>
+        <Cell><Data ss:Type="String">Still pending</Data></Cell>
+      </Row>
+      <Row>
+        <Cell><Data ss:Type="Number">1</Data></Cell>
+        <Cell><Data ss:Type="String">Customer Tickets</Data></Cell>
+        <Cell><Data ss:Type="String"><%= @project_name.first["name"] %></Data></Cell>
+        <Cell><Data ss:Type="Number"><%= @sla.first["value"] %></Data></Cell>
+        <Cell><Data ss:Type="Number"><%= @total.first["value"] %></Data></Cell>
+        <Cell><Data ss:Type="Number"><%= @value_15m.first["value"] %></Data></Cell>
+        <Cell><Data ss:Type="Number"><%= @value_4h.first["value"] %></Data></Cell>
+        <Cell><Data ss:Type="Number"><%= @value_4h1d.first["value"] %></Data></Cell>
+        <Cell><Data ss:Type="Number"><%= @value_2d.first["value"] %></Data></Cell>
+        <Cell><Data ss:Type="Number"><%= @value_3d.first["value"] %></Data></Cell>
+        <Cell><Data ss:Type="Number"><%= @value_13d.first["value"] %></Data></Cell>
+        <Cell><Data ss:Type="Number"><%= @value_sp.first["value"] %></Data></Cell>
+      </Row>
+      <Row></Row>
+      <Row></Row>
+      <Row>
+        <Cell><Data ss:Type="String">Call Priority</Data></Cell>
+      </Row>
+      <Row>
+        <Cell><Data ss:Type="String">Urgent</Data></Cell>
+        <Cell><Data ss:Type="String">Hight</Data></Cell>
+        <Cell><Data ss:Type="String">Immediate</Data></Cell>
+        <Cell><Data ss:Type="String">Medium</Data></Cell>
+        <Cell><Data ss:Type="String">Low</Data></Cell>
+        <Cell><Data ss:Type="String">Normal</Data></Cell>
+      </Row>
+      <Row>
+        <Cell><Data ss:Type="Number"><%= @urgent.first["value"] %></Data></Cell>
+        <Cell><Data ss:Type="Number"><%= @high.first["value"] %></Data></Cell>
+        <Cell><Data ss:Type="Number"><%= @immediate.first["value"] %></Data></Cell>
+        <Cell><Data ss:Type="Number"><%= @medium.first["value"] %></Data></Cell>
+        <Cell><Data ss:Type="Number"><%= @low.first["value"] %></Data></Cell>
+        <Cell><Data ss:Type="Number"><%= @normal.first["value"] %></Data></Cell>
+      </Row>
+      <Row></Row>
+      <Row></Row>
+      <Row>
+        <Cell><Data ss:Type="String">% within SLA: <%= @within_sla.to_f.round %>%</Data></Cell>
+      </Row>
+      <Row></Row>
+      <Row>
+        <Cell><Data ss:Type="String">Problem type breakdown</Data></Cell>
+      </Row>
+      <Row></Row>
+      <Row>
+        <Cell><Data ss:Type="String">Problem name</Data></Cell>
+        <Cell><Data ss:Type="String">% Occurrence</Data></Cell>
+        <Cell><Data ss:Type="String">Count</Data></Cell>
+      </Row>
+      <% @pt.each do |key| %>
+        <% key['name']="Others" if key['name'].to_s.empty? %>
+        <Row>
+          <Cell><Data ss:Type="Number"><%= key['name'] %></Data></Cell>
+          <Cell><Data ss:Type="String"><%= key['value'].to_s %>%</Data></Cell>
+          <Cell><Data ss:Type="String"><%= key['number'] %></Data></Cell>
+        </Row>
+      <% end %>
+    </Table>
+  </Worksheet>
+</Workbook>

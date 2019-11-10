@@ -1,0 +1,68 @@
+# English strings go here for Rails i18n
+fr:
+  # my_label: "My label"
+  customers_title_case_new: "HELPDESK - Customer Tickets"
+  customers_manage_customers: "Gérer les clients"
+  customers_import_label: "Importer un fichier CSV"
+  customers_delete_customer_label: "Effacer"
+  customers_id: "ID"
+  customers_user_id: "ID d'utilisateur"
+  customers_customer_name: "Société cliente"
+  customers_tel_number: "Numéro de téléphone"
+  customers_email_id: "Email"
+  customers_company_name: "Compagnie"
+  customers_subscriber_id: "Abonnée ID"
+  customers_add_customer: "Ajouter un client"
+  customers_customer_plural: "Les clients"
+  customers_new_customer: "Nouveau client"
+  customers_customers: "Les clients"
+  customers_search_for_customers: "Rechercher dans la liste de clients"
+  customers_customer_contact: "Contact client"
+  customers_label_customer_upload_notice: "Choisir un fichier CSV avec les clients"
+  customers_customer_upload_format: "Choisissez le format de téléchargement"
+  customers_customer_upload_encoding: "Choisissez le codage de fichier"
+  customers_customer_upload_splitter: "Séparateur de fichiers CSV"
+  customers_customer_upload_wrapper: "Enveloppe de fichier CSV"
+  customers_customer_upload: "Télécharger un fichier CSV"
+  customers_import_match_columns: "Faire correspondre les colonnes d'importation"
+  customers_submit: "Soumettre"
+  customers_customer_toplines: "Clients à importer:"
+  customers_missing_imported_file: "Fichier importé manquant!"
+  customers_cannot_save_import_file: "Impossible d'enregistrer le fichier d'importation."
+  customers_successfull_import: "Importation réussie"
+  customers_import_results: "Résultats d'importation"
+  customers_result_notice: "Avis d'importation"
+  customers_import_failed: "Echec de l'importation"
+  customers_back: "Retour"
+  customers_show: "Spectacle"
+  customers_all_customers: "Montrer les clients"
+  customers_customer_details: "Détails du client"
+  customers_message_unique_filed_duplicated: "Dupliquer l'ID utilisateur trouvé!"
+  customers_import_failed_rows: "Les lignes suivantes n'ont pas été importées!"
+  customers_query_customer: "Requête client"
+  customers_label_customer_search: "Paramètres de recherche client:"
+  customers_search_for_customers_button: "Choisir un client"
+  field_customer: "Cliente"
+  field_user_id: 'Utilisatrice ID'
+  field_customer_id: "Cliente ID"
+  field_customer_name: 'Cliente Nom'
+  field_subscriber_id: "Abonnée ID"
+  field_tel_number: "Numéro de téléphone du client"
+  field_email: 'Email client'
+  field_email_id: 'Email client'
+  field_company_name: 'Nom de la compagnie'
+  field_subscriber: 'ID d'abonné'
+  field_company_short: "Compagnie"
+  field_email_short: "Email"
+  field_customer_name_short: 'Nom'
+  field_tel_number: "Tel"
+  label_customer_plural: 'Les clients'
+  field_phone: téléphone
+  label_customer_new: 'Nouveau client'
+  label_customer_plural: Les clients
+  customers_number: "Non"
+  customers_contact_info: "Informations de contact"
+  customers_helpdesk_title: "HELPDESK - Billets clients"
+  customers_redmine_cid: "ID client Redmine"
+  customers_customer_address: Adresse du client
+  mns_import_label: Importer des clients
