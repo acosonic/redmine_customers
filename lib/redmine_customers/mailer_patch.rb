@@ -22,9 +22,18 @@ module RedmineCustomers
         cc = [issue.customer.try(:email_id)]
         to = []
         return if cc.empty?
-        issue.each_notification(to + cc) do |users|
-          Mailer.issue_add(issue, to & users, cc & users).deliver
+        if Redmine::VERSION::MAJOR >= 4
+          users = issue.notified_users | issue.notified_watchers
+          users = users & cc
+          users.each do |user|
+            issue_add(user, issue).deliver_later
+          end
+        else
+          issue.each_notification(to + cc) do |users|
+            Mailer.issue_add(issue, to & users, cc & users).deliver
+          end
         end
+
       end
 
       def deliver_issue_edit_with_customers(journal)
