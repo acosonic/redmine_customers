@@ -1,6 +1,6 @@
 <%
    ## Load customer details
-   if issue = @issue.new_record? ? @issue.customer_id : Issue.find_by_id(@issue.id)
+   if issue = @issue.new_record? ? @issue : Issue.find_by_id(@issue.id)
      @customer = Customer.find_by_id(issue.customer_id)
      customer_info = @customer&.customer_name
      customer_email = @customer&.email

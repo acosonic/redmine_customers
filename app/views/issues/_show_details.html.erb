@@ -1,10 +1,10 @@
 <%
 	## Load customer details
 	if @issue.customer_id != nil
-		@customer = Customer.find(@issue.customer_id)
+		@customer = Customer.find_by(id: @issue.customer_id)
 
 %>
-		<% if @customer.active? %>
+		<% if @customer&.active? %>
 				<table class="attributes" style="border:1px dotted gray !important;background:rgba(255,255,255,0.3);">
 					<tbody>
 					<tr>

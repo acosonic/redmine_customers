@@ -9,13 +9,14 @@ module RedmineCustomers
       base.send :include, InstanceMethods
 
       base.class_eval do
-        def redirect_to_customer_query(options)
-          redirect_to customers_path
-        end
+
       end
     end
 
     module InstanceMethods
+      def redirect_to_customer_query(options)
+        redirect_to customers_path
+      end
     end
   end
 end

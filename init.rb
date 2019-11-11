@@ -56,6 +56,7 @@ require 'redmine_customers/custom_fields_helper_patch'
   Issue.send(:include, RedmineCustomers::IssuePatch)
   Mailer.send(:include, RedmineCustomers::MailerPatch)
   IssuesController.send(:include, RedmineCustomers::IssuesControllerPatch)
+  QueriesController.send(:include, RedmineCustomers::QueriesControllerPatch)
   ContextMenusController.send(:include, RedmineCustomers::ContextMenusControllerPatch)
   WatchersController.send(:include, RedmineCustomers::WatchersControllerPatch)
   User.send(:include, RedmineCustomers::UserPatch)
