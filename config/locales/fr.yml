@@ -1,6 +1,5 @@
 # English strings go here for Rails i18n
 fr:
-  # my_label: "My label"
   customers_title_case_new: "HELPDESK - Customer Tickets"
   customers_manage_customers: "Gérer les clients"
   customers_import_label: "Importer un fichier CSV"
@@ -52,7 +51,7 @@ fr:
   field_email: 'Email client'
   field_email_id: 'Email client'
   field_company_name: 'Nom de la compagnie'
-  field_subscriber: 'ID d'abonné'
+  field_subscriber: "ID d\'abonné"
   field_company_short: "Compagnie"
   field_email_short: "Email"
   field_customer_name_short: 'Nom'

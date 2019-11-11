@@ -9,7 +9,7 @@
         <% next if column.to_s.blank? %>
         <% column = column  %>
          <label class="tabular"><%= column %>:
-          <%= select_tag "fields_map[#{column}]", options_for_select( @attrs, column  ) %>
+          <%= select_tag "fields_map[#{column.gsub("\"", "")}]", options_for_select( @attrs, column  ) %>
          </label>
     <% end %>
     </fieldset>

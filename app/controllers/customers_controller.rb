@@ -226,10 +226,18 @@ class CustomersController < ApplicationController
     @failed_count = 0
     @failed_rows = Hash.new
     quote_chars = %w(" | ~ ^ & *)
+    i = 0
     begin
-      CSV.foreach(tmpfile.path, {:headers=>true, :encoding=>encoding, :quote_char=> quote_chars.shift, :col_sep=>splitter, liberal_parsing: true}) do |row|
-
-        customer = Customer.find_by_contact_id(row[attrs_map["contact_id"]] ) || Customer.find_by_email(row[attrs_map["email"]] )  || Customer.new
+      CSV.foreach(tmpfile.path, {:headers=>true, :encoding=>encoding, :quote_char=> quote_chars.shift, :col_sep=>splitter, liberal_parsing: true}) do |csv_row|
+        i += 1
+        row = {}
+        csv_row.to_h.each do |k, v|
+          row[k.to_s.gsub("\"", '')] = v
+        end
+        contact_id = attrs_map["contact_id"].to_s.gsub(/[^a-zA-Z 0-9]/, '').gsub(/\s/,'-')
+        customer = Customer.find_by_contact_id(row[contact_id] ) if row[contact_id].present?
+        customer ||= Customer.find_by_email(row[attrs_map["email"]] )  if row[attrs_map["email"]].present?
+        customer ||= Customer.new
 
         customer.customer_name = row[attrs_map["customer_name"] ]
         customer.phone = row[attrs_map["phone"] ]

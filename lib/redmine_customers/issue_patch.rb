@@ -37,7 +37,7 @@ module RedmineCustomers
 
       def watcher_user_ids_with_customers=(user_ids)
         if user_ids.is_a?(Array)
-          user_ids = user_ids.uniq
+          user_ids = user_ids.uniq.map(&:presence).compact
           user_ids = User.joins("LEFT JOIN groups_users on groups_users.user_id = #{User.table_name}.id").active.where("groups_users.group_id in (:user_ids) or #{User.table_name}.id in (:user_ids)", user_ids: user_ids + [0]).uniq.sort.map(&:id)
         end
 
