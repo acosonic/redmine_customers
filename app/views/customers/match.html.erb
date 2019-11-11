@@ -4,6 +4,8 @@
 <% end %>
 <%= title l(:customers_import_match_columns) %>
 <%= form_tag({:action => 'result'}, {:multipart => true}) do %>
+  <%= check_box_tag :sync, true %> Sync<br/>
+  URL: <%= text_field_tag :url %>
     <fieldset class="box"><legend><%= t(:customers_import_match_columns) %></legend>
     <% @headers.each_with_index do |column, idx| %>
         <% next if column.to_s.blank? %>

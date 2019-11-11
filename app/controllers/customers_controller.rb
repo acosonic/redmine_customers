@@ -217,19 +217,26 @@ class CustomersController < ApplicationController
       end
     end
 
+
     # CSV fields map
     fields_map = params[:fields_map].permit!.to_hash
     # DB attr map
     attrs_map = fields_map.invert
 
+
+    if params[:sync]
+      CustomerImport.where(url: params[:url]).delete_all
+      ci =  CustomerImport.new
+      ci.url = params[:url]
+      ci.settings ={encoding: encoding, :splitter=> splitter, attrs_map: attrs_map}
+      ci.save
+    end
     @handle_count = 0
     @failed_count = 0
     @failed_rows = Hash.new
     quote_chars = %w(" | ~ ^ & *)
-    i = 0
     begin
       CSV.foreach(tmpfile.path, {:headers=>true, :encoding=>encoding, :quote_char=> quote_chars.shift, :col_sep=>splitter, liberal_parsing: true}) do |csv_row|
-        i += 1
         row = {}
         csv_row.to_h.each do |k, v|
           row[k.to_s.gsub("\"", '')] = v
