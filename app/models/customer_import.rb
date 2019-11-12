@@ -1,6 +1,5 @@
 class CustomerImport < ActiveRecord::Base
   serialize :settings
-  attr_accessible :csv
   def self.fetch_all
     all.each do |customer_import|
       begin
@@ -14,10 +13,10 @@ class CustomerImport < ActiveRecord::Base
 
   def fetch
     `wget -c #{self.url} -O csv.csv`
-    @csv = File.join(Rails.root, 'csv.csv')
   end
 
   def sync
+    @csv = File.join(Rails.root, 'csv.csv')
     @handle_count = 0
     @failed_count = 0
     @failed_rows = Hash.new
@@ -61,6 +60,7 @@ class CustomerImport < ActiveRecord::Base
   end
 
   def delete_file
+    @csv = File.join(Rails.root, 'csv.csv')
     `rm #{@csv}`
   end
 end
