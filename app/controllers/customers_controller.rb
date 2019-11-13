@@ -217,7 +217,6 @@ class CustomersController < ApplicationController
       end
     end
 
-
     # CSV fields map
     fields_map = params[:fields_map].permit!.to_hash
     # DB attr map
@@ -231,42 +230,8 @@ class CustomersController < ApplicationController
       ci.settings ={encoding: encoding, :splitter=> splitter, attrs_map: attrs_map}
       ci.save
     end
-    @handle_count = 0
-    @failed_count = 0
-    @failed_rows = Hash.new
-    quote_chars = %w(" | ~ ^ & *)
-    begin
-      CSV.foreach(tmpfile.path, {:headers=>true, :encoding=>encoding, :quote_char=> quote_chars.shift, :col_sep=>splitter, liberal_parsing: true}) do |csv_row|
-        row = {}
-        csv_row.to_h.each do |k, v|
-          row[k.to_s.gsub("\"", '')] = v
-        end
-        contact_id = attrs_map["contact_id"].to_s.gsub(/[^a-zA-Z 0-9]/, '').gsub(/\s/,'-')
-        customer = Customer.find_by_contact_id(row[contact_id] ) if row[contact_id].present?
-        customer ||= Customer.find_by_email(row[attrs_map["email"]] )  if row[attrs_map["email"]].present?
-        customer ||= Customer.new
 
-        customer.customer_name = row[attrs_map["customer_name"] ]
-        customer.phone = row[attrs_map["phone"] ]
-        customer.email = row[attrs_map["email"] ]
-        customer.contact_id = row[attrs_map["contact_id"] ]
-        customer.visible_custom_field_values.each do |custom_field_value|
-          custom_field_value.value = row[attrs_map[custom_field_value.custom_field.name] ] if attrs_map[custom_field_value.custom_field.name].present?
-
-        end
-
-
-        if (!customer.save(:validate => false)) then
-          logger.info(customer.errors.full_messages)
-          @failed_count += 1
-          @failed_rows[@handle_count + 1] = row
-        end
-
-        @handle_count += 1
-      end # do
-    rescue CSV::MalformedCSVError
-      quote_chars.empty? ? raise : retry
-    end
+    @failed_rows, @failed_count, @handle_count = CustomerImport.new.sync(tmpfile.path, {encoding: encoding, splitter: splitter, :attrs_map=> attrs_map})
 
     if @failed_rows.size > 0
       @failed_rows = @failed_rows.sort

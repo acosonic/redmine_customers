@@ -14,6 +14,8 @@ class Customer < ActiveRecord::Base
   include Redmine::SafeAttributes
   include Redmine::I18n
 
+  validates_uniqueness_of :contact_id, :allow_blank => true
+
   safe_attributes 'customer_name',      'phone',      'email',  'custom_field_values', 'contact_id'
 
   has_many :issues
