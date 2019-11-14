@@ -23,7 +23,7 @@
               :method => 'get' %>
       </span>
       <p>
-        <input type="hidden" id="customer_id" value="" name="issue[customer_id]"><!-- //this field is to be the link between customer and a ticket -->
+        <input type="hidden" id="customer_id" value="<%= @issue.customer_id %>" name="issue[customer_id]"><!-- //this field is to be the link between customer and a ticket -->
         <label><%= l(:field_email) %></label>
         <input type="text" id="customer_email" value="<%= customer_email %>" disabled="true">
       </p>
