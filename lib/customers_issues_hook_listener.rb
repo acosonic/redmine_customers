@@ -16,14 +16,14 @@ class CustomersIssuesHookListener < Redmine::Hook::ViewListener
   def view_issues_form_details_top(context={})
     #Rails.logger.info "Successful load of customers issue hook form details"
     issue = context[:issue]
-    if issue && issue.project
+    if issue && issue.project && issue.project.module_enabled?('customers')
       context[:hook_caller].send(:render, :partial => "issues/choose_issue_system", :locals => context)
     end
   end
 
   def view_issues_new_top(context={})
     #Rails.logger.info "Successful load of customers issue hook title"
-    if context[:project]
+    if context[:project] && context[:project].module_enabled?('customers')
       if context[:hook_caller].respond_to?(:render) and context[:request].parameters[:id].blank? and (context[:controller].action_name == "new" or context[:controller].action_name == "update_form")
         context[:hook_caller].send(:render, :partial => "issues/new_issue_top", :locals => context)
       elsif context[:controller].is_a?(ActionController::Base) and context[:request].parameters[:id].blank? and (context[:controller].action_name == "new" or context[:controller].action_name == "update_form")
@@ -36,7 +36,7 @@ class CustomersIssuesHookListener < Redmine::Hook::ViewListener
 
   def view_issues_show_details_bottom(context={})
     #Rails.logger.info "Successful load of customers view issue hook"
-    if context[:project]
+    if context[:project] && context[:project].module_enabled?('customers')
       context[:hook_caller].send(:render, :partial => "issues/show_details", :locals => context)
     end
   end
