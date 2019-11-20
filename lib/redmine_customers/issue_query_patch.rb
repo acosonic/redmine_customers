@@ -25,7 +25,7 @@ module RedmineCustomers
         def initialize_available_filters
           self.available_columns += CustomerCustomField.where(nil).visible.collect {|cf| QueryCustomFieldColumn.new(cf) }
           if User.current.admin?
-            add_available_filter "name", :type => :text
+            add_available_filter "customer_name", :type => :text
             add_available_filter "phone", :type => :text
             add_available_filter "email", :type => :text
 
@@ -91,7 +91,7 @@ module RedmineCustomers
         %w(customer_name phone email).each do |field_name|
           define_method("sql_for_#{field_name}_field") do |field, operator, value|
             db_table = Customer.table_name
-            "#{Issue.table_name}.id IN (#{Issue.joins(:customer).select('issues.id').to_sql} AND #{sql_for_field(field, operator, value, db_table, field)})"
+            "#{Issue.table_name}.id IN (#{Issue.joins(:customer).select('issues.id').to_sql} AND #{sql_for_field("customers.#{field}", operator, value, db_table, field)})"
           end
         end
 
