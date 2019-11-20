@@ -100,6 +100,3 @@ module RedmineCustomers
   end
 end
 
-unless IssueQuery.included_modules.include?(RedmineCustomers::IssueQueryPatch)
-  IssueQuery.send(:include, RedmineCustomers::IssueQueryPatch)
-end

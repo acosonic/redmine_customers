@@ -57,14 +57,11 @@ require 'redmine_customers/custom_fields_helper_patch'
   Mailer.send(:include, RedmineCustomers::MailerPatch)
   IssuesController.send(:include, RedmineCustomers::IssuesControllerPatch)
   QueriesController.send(:include, RedmineCustomers::QueriesControllerPatch)
+  IssueQuery.send(:include, RedmineCustomers::IssueQueryPatch)
   ContextMenusController.send(:include, RedmineCustomers::ContextMenusControllerPatch)
   WatchersController.send(:include, RedmineCustomers::WatchersControllerPatch)
   User.send(:include, RedmineCustomers::UserPatch)
 
-
-prepare_block = Proc.new do
-  Query.send(:include, RedmineCustomers::IssueQueryPatch)
-end
 
 Redmine::Search.map do |search|
   search.register :customers
