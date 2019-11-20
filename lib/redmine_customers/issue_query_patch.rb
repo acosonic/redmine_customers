@@ -11,7 +11,9 @@
 #
 module RedmineCustomers
   module IssueQueryPatch
+
     def self.included(base)
+      base.send :include, InstanceMethods
       base.class_eval do
         unloadable
 
@@ -22,6 +24,8 @@ module RedmineCustomers
 
         alias_method :initialize_available_filters_original, :initialize_available_filters
 
+        alias_method :sql_for_custom_field_without_customers, :sql_for_custom_field
+        alias_method  :sql_for_custom_field, :sql_for_custom_field_with_customers
         def initialize_available_filters
           self.available_columns += CustomerCustomField.where(nil).visible.collect {|cf| QueryCustomFieldColumn.new(cf) }
           if User.current.admin?
@@ -30,55 +34,10 @@ module RedmineCustomers
             add_available_filter "email", :type => :text
 
 
-            add_custom_fields_filters(CustomerCustomField.all, assoc=nil)
-
-
+            add_custom_fields_filters(CustomerCustomField.all)
           end
           initialize_available_filters_original
         end
-
-
-        def sql_for_custom_field(field, operator, value, custom_field_id)
-          db_table = CustomValue.table_name
-          db_field = 'value'
-          filter = @available_filters[field]
-          return nil unless filter
-          if filter[:field].format.target_class && filter[:field].format.target_class <= User
-            if value.delete('me')
-              value.push User.current.id.to_s
-            end
-          end
-          not_in = nil
-          if operator == '!'
-            # Makes ! operator work for custom fields with multiple values
-            operator = '='
-            not_in = 'NOT'
-          end
-          customized_key = "id"
-          customized_class = queried_class
-          if field =~ /^(.+)\.cf_/
-            assoc = $1
-            customized_key = "#{assoc}_id"
-            customized_class = queried_class.reflect_on_association(assoc.to_sym).klass.base_class rescue nil
-            raise "Unknown #{queried_class.name} association #{assoc}" unless customized_class
-          end
-          where = sql_for_field(field, operator, value, db_table, db_field, true)
-          if operator =~ /[<>]/
-            where = "(#{where}) AND #{db_table}.#{db_field} <> ''"
-          end
-          if CustomField.find_by_id(custom_field_id).is_a? CustomerCustomField
-            "#{queried_table_name}.#{customized_key} #{not_in} IN ( #{Issue.joins(:customer).where(customers: {active: true}).select('issues.id').to_sql}  " +
-                " LEFT OUTER JOIN #{db_table} ON #{db_table}.customized_type='Customer' AND #{db_table}.customized_id=#{Customer.table_name}.id AND #{db_table}.custom_field_id=#{custom_field_id}" +
-                " WHERE (#{where}) AND (#{filter[:field].visibility_by_project_condition}))"
-          else
-            "#{queried_table_name}.#{customized_key} #{not_in} IN (" +
-                "SELECT #{customized_class.table_name}.id FROM #{customized_class.table_name}" +
-                " LEFT OUTER JOIN #{db_table} ON #{db_table}.customized_type='#{customized_class}' AND #{db_table}.customized_id=#{customized_class.table_name}.id AND #{db_table}.custom_field_id=#{custom_field_id}" +
-                " WHERE (#{where}) AND (#{filter[:field].visibility_by_project_condition}))"
-          end
-
-        end
-
 
         CustomerCustomField.all.each do |customer_custom_field|
           field_name = customer_custom_field.name
@@ -95,6 +54,48 @@ module RedmineCustomers
           end
         end
 
+      end
+    end
+
+
+    module InstanceMethods
+
+      def sql_for_custom_field_with_customers(field, operator, value, custom_field_id)
+        db_table = CustomValue.table_name
+        db_field = 'value'
+        filter = @available_filters[field]
+        return nil unless filter
+        if filter[:field].format.target_class && filter[:field].format.target_class <= User
+          if value.delete('me')
+            value.push User.current.id.to_s
+          end
+        end
+        not_in = nil
+        if operator == '!'
+          # Makes ! operator work for custom fields with multiple values
+          operator = '='
+          not_in = 'NOT'
+        end
+        customized_key = "id"
+        customized_class = queried_class
+        if field =~ /^(.+)\.cf_/
+          assoc = $1
+          customized_key = "#{assoc}_id"
+          customized_class = queried_class.reflect_on_association(assoc.to_sym).klass.base_class rescue nil
+          raise "Unknown #{queried_class.name} association #{assoc}" unless customized_class
+        end
+        where = sql_for_field(field, operator, value, db_table, db_field, true)
+        if operator =~ /[<>]/
+          where = "(#{where}) AND #{db_table}.#{db_field} <> ''"
+        end
+        if CustomField.find_by_id(custom_field_id).is_a? CustomerCustomField
+          "#{queried_table_name}.#{customized_key} #{not_in} IN (#{Issue.joins(:customer).where(customers: {active: true}).
+              joins( " LEFT OUTER JOIN #{db_table} ON #{db_table}.customized_type='Customer' AND #{db_table}.customized_id=#{Customer.table_name}.id AND #{db_table}.custom_field_id=#{custom_field_id}")
+          .where("(#{where}) AND (#{filter[:field].visibility_by_project_condition})")
+          .select('issues.id').to_sql}  )"
+        else
+          sql_for_custom_field_without_customers(field, operator, value, custom_field_id)
+        end
       end
     end
   end
