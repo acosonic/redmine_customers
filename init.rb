@@ -24,7 +24,7 @@ Redmine::Plugin.register :redmine_customers do
   Redmine::MenuManager.map :top_menu do |menu|
   #  menu.push :customers_case, { :controller=> 'issues', :action=>  'new', :project_id=>'ctcbris' }, :caption => 'New Case', :if => Proc.new { User.current.logged? && User.current.allowed_to?({:controller => 'customers', :action => 'index'}, nil, {:global => true})}
   #  menu.push :customers_report, { :controller=> 'customers_reports', :action=>  'index' }, :caption => 'Report', :if => Proc.new { User.current.logged? && User.current.allowed_to?({:controller => 'customers', :action => 'index'}, nil, {:global => true})}
-    menu.push :customers_customers, { :controller=> 'customers', :action=>  'index' }, :caption => l('label_customers'), :if => Proc.new { User.current.logged? && User.current.allowed_to?({:controller => 'customers', :action => 'index'}, nil, {:global => true})}
+    menu.push :customers_customers, { :controller=> 'customers', :action=>  'index' }, :caption => l('label_customer_plural'), :if => Proc.new { User.current.logged? && User.current.allowed_to?({:controller => 'customers', :action => 'index'}, nil, {:global => true})}
   end
   Redmine::Search.available_search_types << 'customers'
 
