@@ -47,7 +47,6 @@ fr:
   field_customer_id: "Cliente ID"
   field_customer_name: 'Cliente Nom'
   field_subscriber_id: "Abonnée ID"
-  field_tel_number: "Numéro de téléphone du client"
   field_email: 'Email client'
   field_email_id: 'Email client'
   field_company_name: 'Nom de la compagnie'
@@ -59,7 +58,6 @@ fr:
   label_customer_plural: 'Les clients'
   field_phone: téléphone
   label_customer_new: 'Nouveau client'
-  label_customer_plural: Les clients
   customers_number: "Non"
   customers_contact_info: "Informations de contact"
   customers_helpdesk_title: "HELPDESK - Billets clients"
