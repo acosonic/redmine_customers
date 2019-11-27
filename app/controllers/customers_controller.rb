@@ -29,7 +29,8 @@ class CustomersController < ApplicationController
   before_action :require_login
   before_action :set_customer, :only => [:show, :edit, :update, :destroy, :active, :inactive ]
 
-  before_action :authorize_global
+  before_action :authorize_global, except: [:acfind]
+  before_action :require_login, only: [:acfind]
 
   default_search_scope :customers
   accept_api_auth :show

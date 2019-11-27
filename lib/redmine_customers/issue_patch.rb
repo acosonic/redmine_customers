@@ -10,8 +10,14 @@ module RedmineCustomers
 
       base.class_eval do
         belongs_to :customer
-        alias_method_chain :addable_watcher_users, :customers
-        alias_method_chain :watcher_user_ids=, :customers
+
+        alias_method :addable_watcher_users_without_customers, :addable_watcher_users
+        alias_method :addable_watcher_users, :addable_watcher_users_with_customers
+
+       alias_method :watcher_user_ids_without_customers=, :watcher_user_ids=
+        alias_method :watcher_user_ids=, :watcher_user_ids_with_customers=
+
+
         #this is required because otherwise Redmine treats it as a hacking attempt (forbidden parameter)
         safe_attributes 'customer_id', :if => lambda {|issue, user| issue.new_record? || user.allowed_to?(:edit_issues, issue.project) }
         delegate :phone, :customer_name, :email, to: :customer, allow_nil: true

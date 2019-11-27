@@ -9,9 +9,14 @@ module RedmineCustomers
       base.send :include, InstanceMethods
 
       base.class_eval do
-        alias_method_chain :autocomplete_for_user, :customers
-        alias_method_chain :append, :customers
-        alias_method_chain :create, :customers
+        alias_method :autocomplete_for_user_without_customers, :autocomplete_for_user
+        alias_method :autocomplete_for_user, :autocomplete_for_user_with_customers
+
+        alias_method :append_without_customers, :append
+        alias_method :append, :append_with_customers
+
+        alias_method :create_without_customers, :create
+        alias_method :create, :create_with_customers
       end
     end
 

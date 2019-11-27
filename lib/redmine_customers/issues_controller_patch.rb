@@ -9,7 +9,9 @@ module RedmineCustomers
       base.send :include, InstanceMethods
 
       base.class_eval do
-        alias_method_chain :build_new_issue_from_params, :customers
+
+        alias_method :build_new_issue_from_params_without_customers, :build_new_issue_from_params
+        alias_method :build_new_issue_from_params, :build_new_issue_from_params_with_customers
       end
     end
 

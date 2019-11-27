@@ -10,8 +10,11 @@ module RedmineCustomers
       base.extend(ClassMethods)
       base.class_eval do
         class<<self
-          alias_method_chain :deliver_issue_add, :customers
-          alias_method_chain :deliver_issue_edit, :customers
+          alias_method :deliver_issue_add_without_customers, :deliver_issue_add
+          alias_method :deliver_issue_add, :deliver_issue_add_with_customers
+
+          alias_method :deliver_issue_edit_without_customers, :deliver_issue_edit
+          alias_method :deliver_issue_edit, :deliver_issue_edit_with_customers
         end
       end
     end
