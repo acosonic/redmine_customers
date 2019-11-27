@@ -1,6 +1,6 @@
 # English strings go here for Rails i18n
 fr:
-  customers_title_case_new: "HELPDESK - Customer Tickets"
+  customers_title_case_new: "HELPDESK - Client Tickets"
   customers_manage_customers: "Gérer les clients"
   customers_import_label: "Importer un fichier CSV"
   customers_delete_customer_label: "Effacer"
