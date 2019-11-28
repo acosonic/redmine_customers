@@ -21,6 +21,7 @@ class Customer < ActiveRecord::Base
   has_many :issues
   acts_as_searchable :columns => ["#{Customer.table_name}.customer_name", "#{Customer.table_name}.phone","#{Customer.table_name}.contact_id",
                                   "#{Customer.table_name}.email"],
+                    :scope => Customer.includes(:issues=>[:project]),
                     :preload => {:issues => :project},
                     :project_key => "#{Issue.table_name}.project_id"
 
