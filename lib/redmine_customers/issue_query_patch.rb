@@ -17,7 +17,7 @@ module RedmineCustomers
       base.class_eval do
         unloadable
 
-        self.available_columns <<  QueryColumn.new(:customer_name, :sortable => "#{Customer.table_name}.name", :groupable => true)
+        self.available_columns <<  QueryColumn.new(:customer_name, :sortable => "#{Customer.table_name}.customer_name", :groupable => true)
         self.available_columns <<  QueryColumn.new(:phone, :sortable => "#{Customer.table_name}.phone", :groupable => true)
         self.available_columns <<  QueryColumn.new(:email, :sortable => "#{Customer.table_name}.email", :groupable => true)
 
@@ -26,6 +26,13 @@ module RedmineCustomers
 
         alias_method :sql_for_custom_field_without_customers, :sql_for_custom_field
         alias_method  :sql_for_custom_field, :sql_for_custom_field_with_customers
+
+         alias_method :base_scope_without_customers, :base_scope
+         alias_method  :base_scope, :base_scope_with_customers
+
+           alias_method :issues_without_customers, :issues
+           alias_method  :issues, :issues_with_customers
+
         def initialize_available_filters
           self.available_columns += CustomerCustomField.where(nil).visible.collect {|cf| QueryCustomFieldColumn.new(cf) }
           if User.current.admin?
@@ -59,6 +66,52 @@ module RedmineCustomers
 
 
     module InstanceMethods
+
+      def issues_with_customers(options={})
+        order_option = [group_by_sort_order, (options[:order] || sort_clause)].flatten.reject(&:blank?)
+
+        scope = Issue.visible.
+            joins(:status, :project, :customer).
+            preload(:priority).
+            where(statement).
+            includes(([:status, :project] + (options[:include] || [])).uniq).
+            where(options[:conditions]).
+            order(order_option).
+            joins(joins_for_order_statement(order_option.join(','))).
+            limit(options[:limit]).
+            offset(options[:offset])
+
+        scope = scope.preload([:tracker, :author, :assigned_to, :fixed_version, :category, :attachments] & columns.map(&:name))
+        if has_custom_field_column?
+          scope = scope.preload(:custom_values)
+        end
+
+        issues = scope.to_a
+
+        if has_column?(:spent_hours)
+          Issue.load_visible_spent_hours(issues)
+        end
+        if has_column?(:total_spent_hours)
+          Issue.load_visible_total_spent_hours(issues)
+        end
+        if has_column?(:last_updated_by)
+          Issue.load_visible_last_updated_by(issues)
+        end
+        if has_column?(:relations)
+          Issue.load_visible_relations(issues)
+        end
+        if has_column?(:last_notes)
+          Issue.load_visible_last_notes(issues)
+        end
+        issues
+      rescue ::ActiveRecord::StatementInvalid => e
+        raise StatementInvalid.new(e.message)
+      end
+
+      def base_scope_with_customers
+        scope = Issue.visible.joins(:status, :project, :customer).where(statement)
+        scope
+      end
 
       def sql_for_custom_field_with_customers(field, operator, value, custom_field_id)
         db_table = CustomValue.table_name
