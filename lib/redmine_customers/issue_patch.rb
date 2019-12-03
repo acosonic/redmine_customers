@@ -26,12 +26,12 @@ module RedmineCustomers
 
     module InstanceMethods
 
-      def custom_values
-        o = [super]
-        o += customer.try(:custom_values) if customer&.active
-
-        CustomValue.where(id: o.flatten.compact.map(&:id))
-      end
+      #def custom_values
+      #  o = [super]
+      #  o += customer.try(:custom_values) if customer&.active
+      #
+      #  CustomValue.where(id: o.flatten.compact.map(&:id))
+      #end
 
       def addable_watcher_users_with_customers(project = nil )
         if project.nil?
