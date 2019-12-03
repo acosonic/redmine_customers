@@ -71,7 +71,8 @@ module RedmineCustomers
         order_option = [group_by_sort_order, (options[:order] || sort_clause)].flatten.reject(&:blank?)
 
         scope = Issue.visible.
-            joins(:status, :project, :customer).
+            joins(:status, :project).
+            includes(:customer).
             preload(:priority).
             where(statement).
             includes(([:status, :project] + (options[:include] || [])).uniq).
