@@ -35,7 +35,7 @@ module RedmineCustomers
 
         def initialize_available_filters
           self.available_columns += CustomerCustomField.where(nil).visible.collect {|cf| QueryCustomFieldColumn.new(cf) }
-          if User.current.admin?
+          if User.current.allowed_to_globally?(:view_customers, {}) ||  User.current.allowed_to_globally?(:manage_customers, {})
             add_available_filter "customer_name", :type => :text
             add_available_filter "phone", :type => :text
             add_available_filter "email", :type => :text
