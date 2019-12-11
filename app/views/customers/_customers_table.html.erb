@@ -4,9 +4,9 @@
       <th></th>
       <th><%= l(:customers_number) %></th>
 
-      <th><%= l(:field_customer_name_short) %></th>
+      <th><%= l(:field_customer_name) %></th>
       <th><%= l(:field_email_short) %></th>
-      <th><%= l(:field_tel_number) %></th>
+
     </tr>
   </thead>
   <tbody>
@@ -16,7 +16,6 @@
         <td><%= index + 1 %></td>
         <td><%= customer.customer_name %></td>
         <td><%= customer.email %></td>
-        <td><%= customer.phone %></td>
       </tr>
     <% end %>
   </tbody>
