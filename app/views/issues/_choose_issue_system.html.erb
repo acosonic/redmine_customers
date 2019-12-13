@@ -9,7 +9,10 @@
      customer_email = ""
    end
 %>
-<div id="attributes" class="attributes">
+<% if customer = Customer.find_by_email(User.current.mail) %>
+   <input type="hidden" id="customer_id" value="<%= customer.id %>" name="issue[customer_id]">
+<% else %>
+  <div id="attributes" class="attributes">
   <div class="splitcontent">
     <div class="splitcontentleft">
 
@@ -40,3 +43,4 @@
   //  document.location.href='projects/'+$(this).val()+'/issues/new';
   //});
 </script>
+<% end %>
