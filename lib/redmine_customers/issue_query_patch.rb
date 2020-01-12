@@ -23,13 +23,13 @@ module RedmineCustomers
 
 
         alias_method :initialize_available_filters_original, :initialize_available_filters
-
+        #
         alias_method :sql_for_custom_field_without_customers, :sql_for_custom_field
         alias_method  :sql_for_custom_field, :sql_for_custom_field_with_customers
-
+        #
          alias_method :base_scope_without_customers, :base_scope
          alias_method  :base_scope, :base_scope_with_customers
-
+        #
            alias_method :issues_without_customers, :issues
            alias_method  :issues, :issues_with_customers
 
@@ -110,7 +110,7 @@ module RedmineCustomers
       end
 
       def base_scope_with_customers
-        scope = Issue.visible.joins(:status, :project, :customer).where(statement)
+        scope = Issue.visible.joins(:status, :project).includes(:customer).where(statement)
         scope
       end
 
