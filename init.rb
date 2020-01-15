@@ -45,9 +45,13 @@ Redmine::Plugin.register :redmine_customers do
   project_module :customers do
     permission :helpdesk, :issues=> [:helpdesk]
   end
+
+  settings :default => {'default_group_id' => '', },
+           :partial => 'settings/redmine_customer_setting'
 end
 
 require 'redmine_customers/custom_fields_helper_patch'
+require 'redmine/field_format/group_format'
 
 
   unless IssuesController.included_modules.include?(RedmineHelpdeskCustomers::Patches::IssuesControllerPatch)

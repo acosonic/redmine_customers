@@ -1,7 +1,14 @@
 <p>
   <label>
-    <%= l(:redmine_upwork_access_token) %>
+    <%= l(:default_group) %>
   </label>
-
-  <%= select_tag("settings[helpdesk_project_id]", options_for_select(Project.active.pluck(:name, :id), selected: settings['access_token']) ) %>
+  <%= select_tag("settings[default_group_id]", options_for_select(Group.active.pluck(:lastname, :id), selected: settings['default_group_id']), include_blank: true ) %>
 </p>
+
+<p>
+  <label>
+    <%= l(:issue_group_custom_field) %>
+  </label>
+  <%= select_tag("settings[issue_group_custom_field_id]", options_for_select(IssueCustomField.where(field_format: 'group').pluck(:name, :id), selected: settings['issue_group_custom_field_id']), include_blank: true ) %>
+</p>
+

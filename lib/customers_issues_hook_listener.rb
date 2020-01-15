@@ -41,6 +41,14 @@ class CustomersIssuesHookListener < Redmine::Hook::ViewListener
     end
   end
 
+  def controller_issues_new_before_save(context={})
+    issue= context[:issue]
+    cf = Setting.plugin_redmine_customers['issue_group_custom_field_id']
+    if issue.customer && cf && (cfv  = issue.visible_custom_field_values.detect{ |c| c.custom_field_id == cf.to_i} )
+      cfv.value = issue.customer.group_id ||  Setting.plugin_redmine_customers['default_group_id']
+    end
+  end
+
 
   def view_layouts_base_html_head(context={})
     #Rails.logger.info "Successful load of customers base layout hook"

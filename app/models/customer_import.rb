@@ -42,6 +42,7 @@ class CustomerImport < ActiveRecord::Base
         customer.phone = row[attrs_map["phone"] ]
         customer.email = row[attrs_map["email"] ]
         customer.contact_id = row[attrs_map["contact_id"] ]
+        customer.group_id = Group.find_by_lastname(row[attrs_map["group_id"] ]).try(:id)
         customer.visible_custom_field_values.each do |custom_field_value|
           custom_field_value.value = row[attrs_map[custom_field_value.custom_field.name] ] if attrs_map[custom_field_value.custom_field.name].present?
         end

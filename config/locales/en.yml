@@ -77,3 +77,5 @@ en:
   customers_sla_report: "customers SLA Report"
   customers_customer_address: Customer address
   mns_import_label: Import Customers
+  default_group: Default Group
+  issue_group_custom_field: Group for issue Custom Field

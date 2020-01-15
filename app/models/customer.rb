@@ -16,9 +16,13 @@ class Customer < ActiveRecord::Base
 
   validates_uniqueness_of :contact_id, :allow_blank => true
 
-  safe_attributes 'customer_name',      'phone',      'email',  'custom_field_values', 'contact_id'
+  safe_attributes 'customer_name',      'phone',      'email',  'custom_field_values', 'contact_id', 'group_id'
 
   has_many :issues
+
+  belongs_to :group
+
+
   acts_as_searchable :columns => ["#{Customer.table_name}.customer_name", "#{Customer.table_name}.phone","#{Customer.table_name}.contact_id",
                                   "#{Customer.table_name}.email"],
                     :scope => Customer.includes(:issues=>[:project]),
@@ -48,9 +52,11 @@ class Customer < ActiveRecord::Base
   def mail
     email
   end
+
   def attributes_editable?
     true
   end
+
   def deletable?
     true
   end

@@ -64,3 +64,5 @@ fr:
   customers_redmine_cid: "ID client Redmine"
   customers_customer_address: Adresse du client
   mns_import_label: Importer des clients
+  default_group: Groupe par defaut
+  issue_group_custom_field: Champ personalisé des groupes
