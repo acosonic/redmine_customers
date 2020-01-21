@@ -45,7 +45,7 @@ class CustomersIssuesHookListener < Redmine::Hook::ViewListener
     issue= context[:issue]
     cf = Setting.plugin_redmine_customers['issue_group_custom_field_id']
     if issue.customer && cf && (cfv  = issue.visible_custom_field_values.detect{ |c| c.custom_field_id == cf.to_i} )
-      cfv.value = issue.customer.group_id ||  Setting.plugin_redmine_customers['default_group_id']
+      cfv.value = cfv.value.presence || issue.customer.group_id ||  Setting.plugin_redmine_customers['default_group_id']
     end
   end
 
