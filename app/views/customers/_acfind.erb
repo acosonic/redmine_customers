@@ -18,6 +18,21 @@
    $("#customer_id").val(customer.customer_id);
    $("#customer_email").val(customer.customers_email);
    $("#contact_info").val(customer.contact_info);
+   var options = '';
+   var products = eval(customer.customers_products);
+
+   for (var i = 0; i < products.length; i++) {
+       options += '<option value="' + products[i]+ '">' + products[i] + '</option>';
+    }
+
+   $("#issue_custom_field_values_1").html(options);
+
+    var maintenace = eval(customer.customers_maintenance);
+    console.log(maintenace);
+    $("#issue_custom_field_values_1").html('<option value="' + maintenance + '">' + maintenance + '</option>');
+
    hideModal(customers_modal);
  }
+
+
  </script>
