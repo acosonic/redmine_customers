@@ -110,7 +110,7 @@ module RedmineCustomers
       end
 
       def base_scope_with_customers
-        scope = Issue.visible.joins(:status, :project).includes(:customer).where(statement)
+        scope = Issue.visible.joins(:status, :project).includes(:customer).references(:customer).where(statement)
         scope
       end
 
