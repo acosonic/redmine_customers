@@ -11,7 +11,7 @@
 #
 module RedmineCustomers
   module QueryPatch
-    unloadable
+#    unloadable
 
     def self.included(base)
       base.class_eval do

@@ -9,7 +9,7 @@
 # by customers for their existing Redmine instance
 # Otherwise licensed as GPL (keep the copyright notice)
 #
-require 'wicked_pdf'
+#require 'wicked_pdf'
 require 'date'
 
 class CustomersReportsController < ApplicationController

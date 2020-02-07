@@ -12,7 +12,7 @@
   <tbody>
     <% @customers.each_with_index do |customer, index| %>
       <tr class="<%= cycle("odd", "even") %>">
-        <td><%= radio_button_tag "customer_radio", "{ \"customer_id\" :"+customer.id.to_json + ", \"contact_info\" :"+customer.customer_name.to_json + ", \"customers_email\" :"+customer.email.to_json +  " }", nil , :id => nil %></td>
+        <td><%= radio_button_tag "customer_radio", "{ \"customer_id\" :"+customer.id.to_json + ", \"contact_info\" :"+customer.customer_name.to_json + ", \"customers_email\" :"+customer.email.to_json +  ", \"group_id\" :"+ (customer.group_id || Setting.plugin_redmine_customers['default_group_id'] ).to_json +  " }", nil , :id => nil %></td>
         <td><%= index + 1 %></td>
         <td><%= customer.customer_name %></td>
         <td><%= customer.email %></td>

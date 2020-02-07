@@ -7,7 +7,7 @@
 			 <p><%= f.text_field :customer_name, :required => true, :size => 25, :label => l(:customers_customer_name) %></p>
 			 <p><%= f.text_field :phone, :required => true, :size => 25, :label => l(:customers_tel_number) %></p>
 			 <p><%= f.text_field :email, :required => true, :size => 25, :label => l(:customers_email_id) %></p>
-			 <p><%= f.select :group_id, options_for_select(Group.active.pluck(:lastname, :id)), include_blank: true %></p>
+			 <p><%= f.select :group_id, options_for_select(Group.active.pluck(:lastname, :id), selected: f.object.group_id), include_blank: true %></p>
 		</fieldset>
 		<fieldset class="box tabular">
 			<legend><%=t(:label_custom_field)%></legend>

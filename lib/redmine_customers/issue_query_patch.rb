@@ -15,7 +15,7 @@ module RedmineCustomers
     def self.included(base)
       base.send :include, InstanceMethods
       base.class_eval do
-        unloadable
+#        unloadable
 
         self.available_columns <<  QueryColumn.new(:customer_name, :sortable => "#{Customer.table_name}.customer_name", :groupable => true)
         self.available_columns <<  QueryColumn.new(:phone, :sortable => "#{Customer.table_name}.phone", :groupable => true)
@@ -110,7 +110,7 @@ module RedmineCustomers
       end
 
       def base_scope_with_customers
-        scope = Issue.visible.joins(:status, :project).includes(:customer).where(statement)
+        scope = Issue.visible.joins(:status, :project).includes(:customer).references(:customer).where(statement)
         scope
       end
 

@@ -13,3 +13,8 @@ PLUGIN ICON
 .red {
   color:red;
 }
+
+.customers-customers:before {
+    content: "\e917";
+}
+
