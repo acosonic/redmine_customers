@@ -6,16 +6,29 @@
 
       <th><%= l(:field_customer_name) %></th>
       <th><%= l(:field_email_short) %></th>
+      <% CustomerCustomField.where(visible:true).each do |cf| %>
 
+            <th><%= cf.name %></th>
+
+      <% end %>
     </tr>
   </thead>
   <tbody>
-    <% @customers.each_with_index do |customer, index| %>
+    <% @customers.each_with_index do |customer, index|
+         products = customer.visible_custom_field_values.detect {|cfv| cfv.custom_field.name == 'Products'}
+         maintenance = customer.visible_custom_field_values.detect {|cfv| cfv.custom_field.name == 'Active Maintenance'}
+    %>
       <tr class="<%= cycle("odd", "even") %>">
-        <td><%= radio_button_tag "customer_radio", "{ \"customer_id\" :"+customer.id.to_json + ", \"contact_info\" :"+customer.customer_name.to_json + ", \"customers_email\" :"+customer.email.to_json +  ", \"group_id\" :"+ (customer.group_id || Setting.plugin_redmine_customers['default_group_id'] ).to_json +  " }", nil , :id => nil %></td>
+
+        <td><%= radio_button_tag "customer_radio", "{ \"customer_id\" :"+customer.id.to_json + ", \"contact_info\" :"+customer.customer_name.to_json + ", \"customers_email\" :"+customer.email.to_json +  ", \"group_id\" :"+ (customer.group_id || Setting.plugin_redmine_customers['default_group_id'] ).to_json +  ", \"customers_products\" :"+products.value.to_json +  ", \"customers_maintenance\" :"+maintenance.value.to_json +  " }", nil , :id => nil %></td>
+
         <td><%= index + 1 %></td>
         <td><%= customer.customer_name %></td>
         <td><%= customer.email %></td>
+        <% customer.visible_custom_field_values.each_with_index do |value| %>
+              <td><%= value  %>	</td>
+        <% end %>
+        <!-- -->
       </tr>
     <% end %>
   </tbody>
