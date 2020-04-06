@@ -8,6 +8,7 @@ class CustomerQuery < Query
       QueryColumn.new(:customer_name, :sortable => "#{Customer.table_name}.customer_name", :default_order => 'desc', :frozen => true),
       QueryColumn.new(:phone, :sortable => "#{Customer.table_name}.phone", :default_order => 'desc'),
       QueryColumn.new(:email, :sortable => "#{Customer.table_name}.email", :default_order => 'desc'),
+      QueryColumn.new(:group, :sortable => "#{Group.table_name}.lastname", :default_order => 'desc'),
       QueryColumn.new(:contact_id, :sortable => "#{Customer.table_name}.contact_id", :default_order => 'desc'),
   ]
 
@@ -56,6 +57,7 @@ class CustomerQuery < Query
     add_available_filter "customer_name", :type => :text
     add_available_filter "email", :type => :text
     add_available_filter "phone", :type => :text
+    add_available_filter "group_id", :type => :list, values: Group.active.pluck(:lastname, :id).collect { |name, id| [name, id.to_s] }
     add_available_filter "created_on", :type => :date_past
     add_available_filter "updated_on", :type => :date_past
 
@@ -92,7 +94,7 @@ class CustomerQuery < Query
   end
 
   def base_scope
-    Customer.visible.where(statement)
+    Customer.includes(:group).visible.where(statement)
   end
 
   # Returns the issue count
@@ -107,7 +109,7 @@ class CustomerQuery < Query
   def customers(options={})
     order_option = [group_by_sort_order, (options[:order] || sort_clause)].flatten.reject(&:blank?)
 
-    scope = Customer.visible.
+    scope = Customer.includes(:group).visible.
         where(statement).
         where(options[:conditions]).
         order(order_option).

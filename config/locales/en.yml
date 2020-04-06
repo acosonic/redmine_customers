@@ -50,6 +50,7 @@ en:
   field_customer: "Customer"
   field_user_id: 'User ID'
   field_customer_id: "Customer ID"
+  field_group: "Group"
   field_tan_number: "TAN"
   field_customer_name: 'Customer Name'
   field_subscriber_id: "Subscriber ID"
