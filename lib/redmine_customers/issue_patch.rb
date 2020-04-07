@@ -20,7 +20,7 @@ module RedmineCustomers
 
         #this is required because otherwise Redmine treats it as a hacking attempt (forbidden parameter)
         safe_attributes 'customer_id', :if => lambda {|issue, user| issue.new_record? || user.allowed_to?(:edit_issues, issue.project) }
-        delegate :phone, :customer_name, :email, to: :customer, allow_nil: true
+        delegate :phone, :customer_name, :email, :group, to: :customer, allow_nil: true
       end
     end
 

@@ -20,6 +20,7 @@ module RedmineCustomers
         self.available_columns <<  QueryColumn.new(:customer_name, :sortable => "#{Customer.table_name}.customer_name", :groupable => true)
         self.available_columns <<  QueryColumn.new(:phone, :sortable => "#{Customer.table_name}.phone", :groupable => true)
         self.available_columns <<  QueryColumn.new(:email, :sortable => "#{Customer.table_name}.email", :groupable => true)
+        self.available_columns <<  QueryColumn.new(:group, :sortable => "#{Customer.table_name}.group", :groupable => true)
 
 
         alias_method :initialize_available_filters_original, :initialize_available_filters
@@ -37,6 +38,7 @@ module RedmineCustomers
           self.available_columns += CustomerCustomField.where(nil).visible.collect {|cf| QueryCustomFieldColumn.new(cf) }
           if User.current.allowed_to_globally?(:view_customers, {}) ||  User.current.allowed_to_globally?(:manage_customers, {})
             add_available_filter "customer_name", :type => :text
+            add_available_filter "customer_group_id", :type => :list, values: Group.active.pluck(:lastname, :id).collect { |name, id| [name, id.to_s] }
             add_available_filter "phone", :type => :text
             add_available_filter "email", :type => :text
 
@@ -58,6 +60,13 @@ module RedmineCustomers
           define_method("sql_for_#{field_name}_field") do |field, operator, value|
             db_table = Customer.table_name
             "#{Issue.table_name}.id IN (#{Issue.joins(:customer).select('issues.id').to_sql} AND #{sql_for_field("customers.#{field}", operator, value, db_table, field)})"
+          end
+        end
+
+      %w(customer_group_id).each do |field_name|
+          define_method("sql_for_#{field_name}_field") do |field, operator, value|
+            db_table = Customer.table_name
+            "#{Issue.table_name}.id IN (#{Issue.joins(:customer).select('issues.id').to_sql} AND #{sql_for_field("customers.group_id", operator, value, db_table, 'group_id')})"
           end
         end
 

@@ -27,6 +27,8 @@ fr:
   customers_import_match_columns: "Faire correspondre les colonnes d'importation"
   customers_submit: "Soumettre"
   field_group: "Groupe"
+  field_customer_group_id: Groupe client
+  field_customer_group: Groupe client
   customers_customer_toplines: "Clients à importer:"
   customers_missing_imported_file: "Fichier importé manquant!"
   customers_cannot_save_import_file: "Impossible d'enregistrer le fichier d'importation."
