@@ -1,52 +1,43 @@
-#
-# Redmine 2.4 plugin - customers plugin
-#
-# Custom developed 2016,2017 for customers Mauritius
-# Author: Aleksandar Pavic - acosonic@gmail.com
-# LCP Services, Bul. P. Pavla 8/24, 21000 Novi Sad, Serbia
-#
-# Copyrighted by LCP and customers, built specifically to be used
-# by customers for their existing Redmine instance
-# Otherwise licensed as GPL (keep the copyright notice)
-#
-class Customer < ActiveRecord::Base
-  unloadable
+# Custom developed 2016-2017 for customers Mauritius
+# Author: Aleksandar Pavic - LCP Services
+# Rails 7 / Redmine 6 port: 2026-06 (Inctime)
+# GPL
+class Customer < ApplicationRecord
   include Redmine::SafeAttributes
   include Redmine::I18n
 
-  validates_uniqueness_of :contact_id, :allow_blank => true
+  validates_uniqueness_of :contact_id, allow_blank: true
 
-  safe_attributes 'customer_name',      'phone',      'email',  'custom_field_values', 'contact_id', 'group_id'
+  safe_attributes 'customer_name', 'phone', 'email',
+                  'custom_field_values', 'contact_id', 'group_id'
 
   has_many :issues
+  belongs_to :group, optional: true
 
-  belongs_to :group
+  acts_as_searchable columns: [
+                       "#{Customer.table_name}.customer_name",
+                       "#{Customer.table_name}.phone",
+                       "#{Customer.table_name}.contact_id",
+                       "#{Customer.table_name}.email"
+                     ],
+                     scope:       Customer.includes(issues: [:project]),
+                     preload:     { issues: :project },
+                     project_key: "#{Issue.table_name}.project_id"
 
-
-  acts_as_searchable :columns => ["#{Customer.table_name}.customer_name", "#{Customer.table_name}.phone","#{Customer.table_name}.contact_id",
-                                  "#{Customer.table_name}.email"],
-                    :scope => Customer.includes(:issues=>[:project]),
-                    :preload => {:issues => :project},
-                    :project_key => "#{Issue.table_name}.project_id"
-
-
-  acts_as_event :title => Proc.new {|o| "#{o.customer_name}"},
+  acts_as_event title:       proc { |o| o.customer_name.to_s },
                 description: :description,
-                :url => Proc.new {|o| {:controller => 'customers', :action => 'show', :id => o.id}},
-                :type => Proc.new {|o| 'customer' },
-                :datetime => :created_at
+                url:         proc { |o| { controller: 'customers', action: 'show', id: o.id } },
+                type:        proc { |_o| 'customer' },
+                datetime:    :created_on
 
   acts_as_customizable
 
-  def self.visible(user = User.current)
+  def self.visible(_user = User.current)
     where(active: true)
   end
 
   def self.customer_attrs
-    attrs = []
-    attrs<< Customer.column_names
-    attrs<< CustomerCustomField.pluck(:name)
-    attrs.flatten.compact
+    (column_names + CustomerCustomField.pluck(:name)).compact
   end
 
   def mail
@@ -66,19 +57,18 @@ class Customer < ActiveRecord::Base
   end
 
   def self.acf(search)
-    where("customer_name LIKE ?", "%#{search}%")
+    where('customer_name LIKE ?', "%#{search}%")
   end
 
   def event_datetime
     created_on
   end
 
-  # Returns the custom_field_values that can be edited by the given user
-  def editable_custom_field_values(user=nil)
+  def editable_custom_field_values(user = nil)
     visible_custom_field_values(user)
   end
 
-  def visible_custom_field_values(user=nil)
+  def visible_custom_field_values(_user = nil)
     custom_field_values
   end
 
@@ -86,16 +76,11 @@ class Customer < ActiveRecord::Base
     nil
   end
 
-  # Returns the custom fields that can be edited by the given user
-  def editable_custom_fields(user=nil)
+  def editable_custom_fields(user = nil)
     editable_custom_field_values(user).map(&:custom_field).uniq
   end
 
-
-  ##
-  # Custom serializer
-  
   def to_s
-    customer_name + email + phone
+    "#{customer_name}#{email}#{phone}"
   end
 end

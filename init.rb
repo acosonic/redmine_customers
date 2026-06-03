@@ -1,74 +1,103 @@
 ##
-#  Redmine 2.4 plugin - customers plugin
+#  Redmine plugin - customers
 #
-#  Custom developed 2015,2016 for customers Mauritius
-#  Author: Aleksandar Pavic - acosonic@gmail.com
-#  LCP Services, Bul. P. Pavla 8/24, 21000 Novi Sad, Serbia
+#  Original: custom developed 2015-2016 for client "customers" (Mauritius)
+#  Original author: Aleksandar Pavic - acosonic@gmail.com (LCP Services, Novi Sad)
+#  Bilel Kedidi: 2019-2020 enhancements (group filter, FR translation)
+#  Rails 7 / Redmine 6 port: 2026-06 (Inctime)
 #
-#  Copyrighted by LCP and customers, built specifically to be used
-#  by customers for their existing Redmine instance
-#  Otherwise licensed as GPL (keep the copyright notice)
-#
+#  GPL — keep copyright notice
 ##
 
-  require "customers_issues_hook_listener"
+require 'redmine'
+require_relative 'lib/customers_issues_hook_listener'
+require_relative 'lib/redmine_customers/custom_fields_helper_patch'
+require_relative 'lib/redmine/field_format/group_format'
 
 
 Redmine::Plugin.register :redmine_customers do
-  name 'Redmine Customers plugin'
-  author 'Aleksandar Pavic'
-  description 'Custom developed plugin for customers - Mauritius'
-  version '1.0.0'
-  url 'http://customers.mu'
-  author_url 'http://redminecookbook.com'
+  name        'Redmine Customers plugin'
+  author      'Aleksandar Pavic'
+  description 'Customer relationship tracking for Redmine'
+  version     '2.0.0'
+  url         'https://github.com/acosonic/redmine_plugins'
+  author_url  'https://inctime.com'
+
+  requires_redmine version_or_higher: '6.0'
+
   Redmine::MenuManager.map :top_menu do |menu|
-  #  menu.push :customers_case, { :controller=> 'issues', :action=>  'new', :project_id=>'ctcbris' }, :caption => 'New Case', :if => Proc.new { User.current.logged? && User.current.allowed_to?({:controller => 'customers', :action => 'index'}, nil, {:global => true})}
-  #  menu.push :customers_report, { :controller=> 'customers_reports', :action=>  'index' }, :caption => 'Report', :if => Proc.new { User.current.logged? && User.current.allowed_to?({:controller => 'customers', :action => 'index'}, nil, {:global => true})}
-    menu.push :customers_customers, { :controller=> 'customers', :action=>  'index' }, :caption => :label_customer_plural, :if => Proc.new { User.current.logged? && User.current.allowed_to?({:controller => 'customers', :action => 'index'}, nil, {:global => true})}
+    menu.push :customers_customers,
+              { controller: 'customers', action: 'index' },
+              caption: :label_customer_plural,
+              if: Proc.new {
+                User.current.logged? &&
+                  User.current.allowed_to?(
+                    { controller: 'customers', action: 'index' },
+                    nil, global: true
+                  )
+              }
   end
-  Redmine::Search.available_search_types << 'customers'
 
   Redmine::MenuManager.map :admin_menu do |menu|
-    menu.push :customers_customers, { controller: 'customers', action: 'index', id: 'customers' }, :caption => :label_customer_plural, html: {class: 'icon'}
+    menu.push :customers_customers,
+              { controller: 'customers', action: 'index', id: 'customers' },
+              caption: :label_customer_plural,
+              html: { class: 'icon' }
   end
 
-  permission :view_customers, :customers => :index
-  permission :activate_customers, :customers => [:active, :inactive]
-  permission :manage_customers, :customers => [:index, :show, :active, :inactive, :new, :create, :edit, :update, :destroy]
-  permission :add_customers, :customers => [:new, :create]
-  permission :create_helpdesk_request, :helpdesk => :new
+  Redmine::Search.available_search_types << 'customers'
 
-  # project_module :issue_tracking do
-  #   permission :helpdesk, :issues=> [:helpdesk, :update_helpdesk_form]
-  # end
+  permission :view_customers,             customers: :index
+  permission :activate_customers,         customers: [:active, :inactive]
+  permission :manage_customers,           customers: [:index, :show, :active, :inactive,
+                                                      :new, :create, :edit, :update, :destroy]
+  permission :add_customers,              customers: [:new, :create]
+  permission :create_helpdesk_request,    helpdesk:  :new
 
   project_module :customers do
-    permission :helpdesk, :issues=> [:helpdesk]
+    permission :helpdesk, issues: [:helpdesk]
   end
 
-  settings :default => {'default_group_id' => '', },
-           :partial => 'settings/redmine_customer_setting'
+  settings default: { 'default_group_id' => '' },
+           partial: 'settings/redmine_customer_setting'
 end
-
-require 'redmine_customers/custom_fields_helper_patch'
-require 'redmine/field_format/group_format'
-
-
-  unless IssuesController.included_modules.include?(RedmineHelpdeskCustomers::Patches::IssuesControllerPatch)
-    IssuesController.send(:include, RedmineHelpdeskCustomers::Patches::IssuesControllerPatch)
-  end
-  Issue.send(:include, RedmineCustomers::IssuePatch)
-  Mailer.send(:include, RedmineCustomers::MailerPatch)
-  IssuesController.send(:include, RedmineCustomers::IssuesControllerPatch)
-  QueriesController.send(:include, RedmineCustomers::QueriesControllerPatch)
-  IssueQuery.send(:include, RedmineCustomers::IssueQueryPatch)
-  ContextMenusController.send(:include, RedmineCustomers::ContextMenusControllerPatch)
-  WatchersController.send(:include, RedmineCustomers::WatchersControllerPatch)
-  User.send(:include, RedmineCustomers::UserPatch)
-
 
 Redmine::Search.map do |search|
   search.register :customers
 end
 
-Mime::Type.register "application/xls", :xls
+Mime::Type.register 'application/xls', :xls unless Mime::Type.lookup_by_extension(:xls)
+
+# Apply monkey-patches. We do this both in to_prepare (for dev mode reloads)
+# AND immediately (for production eager-load where to_prepare may not refire).
+RedmineCustomersPatches = lambda do
+  {
+    IssuesController       => [
+      RedmineHelpdeskCustomers::Patches::IssuesControllerPatch,
+      RedmineCustomers::IssuesControllerPatch
+    ],
+    Issue                  => [RedmineCustomers::IssuePatch],
+    Mailer                 => [RedmineCustomers::MailerPatch],
+    QueriesController      => [RedmineCustomers::QueriesControllerPatch],
+    IssueQuery             => [RedmineCustomers::IssueQueryPatch],
+    ContextMenusController => [RedmineCustomers::ContextMenusControllerPatch],
+    WatchersController     => [RedmineCustomers::WatchersControllerPatch],
+    User                   => [RedmineCustomers::UserPatch]
+  }.each do |target, mods|
+    mods.each do |mod|
+      target.prepend(mod) unless target.ancestors.include?(mod)
+    end
+  end
+end
+
+# Apply patches directly at plugin load time. Constants resolve via Zeitwerk.
+Rails.logger.info "[redmine_customers] applying patches at init.rb load"
+RedmineCustomersPatches.call
+RedmineCustomers::CustomFieldsHelperPatch.apply!
+Rails.logger.info "[redmine_customers] patches applied OK"
+
+# Also re-apply on each dev-mode reload.
+Rails.application.config.to_prepare do
+  RedmineCustomersPatches.call
+  RedmineCustomers::CustomFieldsHelperPatch.apply!
+end

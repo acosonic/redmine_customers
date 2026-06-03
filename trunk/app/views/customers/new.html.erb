@@ -1,9 +1,0 @@
-<%= title [l(:customers_customer_plural), customers_path], l(:customers_new_customer) %>
-
-<%= labelled_form_for @customer do |f| %>
-<%= render :partial => 'form', :locals => { :f => f } %>
-<p>
-  <%= f.submit l(:button_create) %>
-  <%= f.submit l(:button_create_and_continue), :name => 'continue' %>
-</p>
-<% end %>

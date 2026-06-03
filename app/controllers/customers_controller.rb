@@ -11,8 +11,6 @@
 #
 ##
 class CustomersController < ApplicationController
-  unloadable
-
   helper :sort
   include SortHelper
   require 'csv'
@@ -112,10 +110,11 @@ class CustomersController < ApplicationController
   end
 
   def update
-    if @customer.update_attributes(params[:customer].permit!)
-      flash[:notice] = "Successfully updated"
+    if @customer.update(params[:customer].permit!)
+      flash[:notice] = l(:notice_successful_update)
     else
       render 'edit'
+      return
     end
     redirect_to @customer
   end

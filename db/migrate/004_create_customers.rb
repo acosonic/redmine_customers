@@ -1,4 +1,4 @@
-class CreateCustomers  < Rails.version < '5.1' ? ActiveRecord::Migration : ActiveRecord::Migration[4.2]
+class CreateCustomers  < ActiveRecord::Migration[6.0]
   def self.up
     if ActiveRecord::Base.connection.table_exists? 'customers'
       drop_table :customers

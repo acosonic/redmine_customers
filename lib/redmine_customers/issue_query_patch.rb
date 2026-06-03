@@ -1,166 +1,151 @@
-#
-# Redmine 2.4 plugin - customers plugin
-#
-# Custom developed 2016,2017 for customers Mauritius
-# Author: Aleksandar Pavic - acosonic@gmail.com
-# LCP Services, Bul. P. Pavla 8/24, 21000 Novi Sad, Serbia
-#
-# Copyrighted by LCP and customers, built specifically to be used
-# by customers for their existing Redmine instance
-# Otherwise licensed as GPL (keep the copyright notice)
-#
+# Custom developed 2016-2017 for customers Mauritius
+# Author: Aleksandar Pavic - LCP Services
+# Rails 7 / Redmine 6 port: 2026-06 (Inctime)
+# GPL
+
 module RedmineCustomers
   module IssueQueryPatch
-
-    def self.included(base)
-      base.send :include, InstanceMethods
+    def self.prepended(base)
       base.class_eval do
-#        unloadable
+        # idempotent column registration (prepend runs once but be defensive)
+        new_cols = [
+          QueryColumn.new(:customer_name, sortable: "customers.customer_name", groupable: true),
+          QueryColumn.new(:phone,         sortable: "customers.phone",         groupable: true),
+          QueryColumn.new(:email,         sortable: "customers.email",         groupable: true),
+          QueryColumn.new(:group,         sortable: "customers.group",         groupable: true)
+        ]
+        existing_names = available_columns.map(&:name)
+        new_cols.each { |col| available_columns << col unless existing_names.include?(col.name) }
 
-        self.available_columns <<  QueryColumn.new(:customer_name, :sortable => "#{Customer.table_name}.customer_name", :groupable => true)
-        self.available_columns <<  QueryColumn.new(:phone, :sortable => "#{Customer.table_name}.phone", :groupable => true)
-        self.available_columns <<  QueryColumn.new(:email, :sortable => "#{Customer.table_name}.email", :groupable => true)
-        self.available_columns <<  QueryColumn.new(:group, :sortable => "#{Customer.table_name}.group", :groupable => true)
-
-
-        alias_method :initialize_available_filters_original, :initialize_available_filters
-        #
-        alias_method :sql_for_custom_field_without_customers, :sql_for_custom_field
-        alias_method  :sql_for_custom_field, :sql_for_custom_field_with_customers
-        #
-         alias_method :base_scope_without_customers, :base_scope
-         alias_method  :base_scope, :base_scope_with_customers
-        #
-           alias_method :issues_without_customers, :issues
-           alias_method  :issues, :issues_with_customers
-
-        def initialize_available_filters
-          self.available_columns += CustomerCustomField.where(nil).visible.collect {|cf| QueryCustomFieldColumn.new(cf) }
-          if User.current.allowed_to_globally?(:view_customers, {}) ||  User.current.allowed_to_globally?(:manage_customers, {})
-            add_available_filter "customer_name", :type => :text
-            add_available_filter "customer_group_id", :type => :list, values: Group.active.pluck(:lastname, :id).collect { |name, id| [name, id.to_s] }
-            add_available_filter "phone", :type => :text
-            add_available_filter "email", :type => :text
-
-
-            add_custom_fields_filters(CustomerCustomField.all)
+        # Generate one sql_for_<name>_field method per CustomerCustomField.
+        # NOTE: evaluated lazily on first IssueQuery instance — schema_loader
+        # may not be ready at plugin boot time, so we guard the lookup.
+        Rails.application.config.after_initialize do
+          if defined?(CustomerCustomField) &&
+             ActiveRecord::Base.connection.data_source_exists?('custom_fields')
+            CustomerCustomField.all.each do |ccf|
+              field_name = ccf.name
+              ccf_id = ccf.id
+              define_method("sql_for_#{field_name}_field") do |field, operator, value|
+                "#{Issue.table_name}.id IN (#{Issue.joins(:customer).select('issues.id').to_sql} " \
+                  "AND #{sql_for_customer_custom_field(field, operator, value, ccf_id)})"
+              end
+            end
           end
-          initialize_available_filters_original
         end
 
-        CustomerCustomField.all.each do |customer_custom_field|
-          field_name = customer_custom_field.name
+        %w[customer_name phone email].each do |field_name|
           define_method("sql_for_#{field_name}_field") do |field, operator, value|
             db_table = Customer.table_name
-            "#{Issue.table_name}.id IN (#{Issue.joins(:customer).select('issues.id').to_sql} AND #{sql_for_customer_custom_field(field, operator, value, customer_custom_field.id)})"
+            "#{Issue.table_name}.id IN (#{Issue.joins(:customer).select('issues.id').to_sql} " \
+              "AND #{sql_for_field("customers.#{field}", operator, value, db_table, field)})"
           end
         end
 
-        %w(customer_name phone email).each do |field_name|
-          define_method("sql_for_#{field_name}_field") do |field, operator, value|
-            db_table = Customer.table_name
-            "#{Issue.table_name}.id IN (#{Issue.joins(:customer).select('issues.id').to_sql} AND #{sql_for_field("customers.#{field}", operator, value, db_table, field)})"
-          end
+        define_method(:sql_for_customer_group_id_field) do |field, operator, value|
+          db_table = Customer.table_name
+          "#{Issue.table_name}.id IN (#{Issue.joins(:customer).select('issues.id').to_sql} " \
+            "AND #{sql_for_field('customers.group_id', operator, value, db_table, 'group_id')})"
         end
-
-      %w(customer_group_id).each do |field_name|
-          define_method("sql_for_#{field_name}_field") do |field, operator, value|
-            db_table = Customer.table_name
-            "#{Issue.table_name}.id IN (#{Issue.joins(:customer).select('issues.id').to_sql} AND #{sql_for_field("customers.group_id", operator, value, db_table, 'group_id')})"
-          end
-        end
-
       end
     end
 
+    def initialize_available_filters
+      self.available_columns += CustomerCustomField.where(nil).visible.collect { |cf| QueryCustomFieldColumn.new(cf) }
 
-    module InstanceMethods
+      if User.current.allowed_to_globally?(:view_customers, {}) ||
+         User.current.allowed_to_globally?(:manage_customers, {})
+        add_available_filter 'customer_name',
+                             type: :text
+        add_available_filter 'customer_group_id',
+                             type:   :list,
+                             values: Group.active.pluck(:lastname, :id).collect { |name, id| [name, id.to_s] }
+        add_available_filter 'phone', type: :text
+        add_available_filter 'email', type: :text
 
-      def issues_with_customers(options={})
-        order_option = [group_by_sort_order, (options[:order] || sort_clause)].flatten.reject(&:blank?)
-
-        scope = Issue.visible.
-            joins(:status, :project).
-            includes(:customer).
-            preload(:priority).
-            where(statement).
-            includes(([:status, :project] + (options[:include] || [])).uniq).
-            where(options[:conditions]).
-            order(order_option).
-            joins(joins_for_order_statement(order_option.join(','))).
-            limit(options[:limit]).
-            offset(options[:offset])
-
-        scope = scope.preload([:tracker, :author, :assigned_to, :fixed_version, :category, :attachments] & columns.map(&:name))
-        if has_custom_field_column?
-          scope = scope.preload(:custom_values)
-        end
-
-        issues = scope.to_a
-
-        if has_column?(:spent_hours)
-          Issue.load_visible_spent_hours(issues)
-        end
-        if has_column?(:total_spent_hours)
-          Issue.load_visible_total_spent_hours(issues)
-        end
-        if has_column?(:last_updated_by)
-          Issue.load_visible_last_updated_by(issues)
-        end
-        if has_column?(:relations)
-          Issue.load_visible_relations(issues)
-        end
-        if has_column?(:last_notes)
-          Issue.load_visible_last_notes(issues)
-        end
-        issues
-      rescue ::ActiveRecord::StatementInvalid => e
-        raise StatementInvalid.new(e.message)
+        add_custom_fields_filters(CustomerCustomField.all)
       end
 
-      def base_scope_with_customers
-        scope = Issue.visible.joins(:status, :project).includes(:customer).references(:customer).where(statement)
-        scope
+      super
+    end
+
+    def sql_for_custom_field(field, operator, value, custom_field_id)
+      cf = CustomField.find_by(id: custom_field_id)
+      return super unless cf.is_a?(CustomerCustomField)
+
+      db_table = CustomValue.table_name
+      db_field = 'value'
+      filter = @available_filters[field]
+      return nil unless filter
+
+      if filter[:field].format.target_class && filter[:field].format.target_class <= User
+        value.push(User.current.id.to_s) if value.delete('me')
       end
 
-      def sql_for_custom_field_with_customers(field, operator, value, custom_field_id)
-        db_table = CustomValue.table_name
-        db_field = 'value'
-        filter = @available_filters[field]
-        return nil unless filter
-        if filter[:field].format.target_class && filter[:field].format.target_class <= User
-          if value.delete('me')
-            value.push User.current.id.to_s
-          end
-        end
-        not_in = nil
-        if operator == '!'
-          # Makes ! operator work for custom fields with multiple values
-          operator = '='
-          not_in = 'NOT'
-        end
-        customized_key = "id"
-        customized_class = queried_class
-        if field =~ /^(.+)\.cf_/
-          assoc = $1
-          customized_key = "#{assoc}_id"
-          customized_class = queried_class.reflect_on_association(assoc.to_sym).klass.base_class rescue nil
-          raise "Unknown #{queried_class.name} association #{assoc}" unless customized_class
-        end
-        where = sql_for_field(field, operator, value, db_table, db_field, true)
-        if operator =~ /[<>]/
-          where = "(#{where}) AND #{db_table}.#{db_field} <> ''"
-        end
-        if CustomField.find_by_id(custom_field_id).is_a? CustomerCustomField
-          "#{queried_table_name}.#{customized_key} #{not_in} IN (#{Issue.joins(:customer).where(customers: {active: true}).
-              joins( " LEFT OUTER JOIN #{db_table} ON #{db_table}.customized_type='Customer' AND #{db_table}.customized_id=#{Customer.table_name}.id AND #{db_table}.custom_field_id=#{custom_field_id}")
-          .where("(#{where}) AND (#{filter[:field].visibility_by_project_condition})")
-          .select('issues.id').to_sql}  )"
-        else
-          sql_for_custom_field_without_customers(field, operator, value, custom_field_id)
-        end
+      not_in = nil
+      if operator == '!'
+        operator = '='
+        not_in = 'NOT'
       end
+
+      customized_key = 'id'
+      customized_class = queried_class
+      if field =~ /^(.+)\.cf_/
+        assoc = ::Regexp.last_match(1)
+        customized_key = "#{assoc}_id"
+        customized_class = queried_class.reflect_on_association(assoc.to_sym).klass.base_class rescue nil
+        raise "Unknown #{queried_class.name} association #{assoc}" unless customized_class
+      end
+
+      where = sql_for_field(field, operator, value, db_table, db_field, true)
+      where = "(#{where}) AND #{db_table}.#{db_field} <> ''" if operator =~ /[<>]/
+
+      "#{queried_table_name}.#{customized_key} #{not_in} IN (" \
+        "#{Issue.joins(:customer).where(customers: { active: true })
+                 .joins(" LEFT OUTER JOIN #{db_table} ON #{db_table}.customized_type='Customer' " \
+                        "AND #{db_table}.customized_id=#{Customer.table_name}.id " \
+                        "AND #{db_table}.custom_field_id=#{custom_field_id}")
+                 .where("(#{where}) AND (#{filter[:field].visibility_by_project_condition})")
+                 .select('issues.id').to_sql})"
+    end
+
+    def base_scope
+      Issue.visible.joins(:status, :project)
+           .includes(:customer).references(:customer)
+           .where(statement)
+    end
+
+    def issues(options = {})
+      order_option = [group_by_sort_order, (options[:order] || sort_clause)].flatten.reject(&:blank?)
+
+      scope = Issue.visible
+                   .joins(:status, :project)
+                   .includes(:customer)
+                   .preload(:priority)
+                   .where(statement)
+                   .includes(([:status, :project] + (options[:include] || [])).uniq)
+                   .where(options[:conditions])
+                   .order(order_option)
+                   .joins(joins_for_order_statement(order_option.join(',')))
+                   .limit(options[:limit])
+                   .offset(options[:offset])
+
+      preload_assocs = [:tracker, :author, :assigned_to, :fixed_version, :category, :attachments] &
+                       columns.map(&:name)
+      scope = scope.preload(preload_assocs)
+      scope = scope.preload(:custom_values) if has_custom_field_column?
+
+      issues = scope.to_a
+
+      Issue.load_visible_spent_hours(issues)       if has_column?(:spent_hours)
+      Issue.load_visible_total_spent_hours(issues) if has_column?(:total_spent_hours)
+      Issue.load_visible_last_updated_by(issues)   if has_column?(:last_updated_by)
+      Issue.load_visible_relations(issues)         if has_column?(:relations)
+      Issue.load_visible_last_notes(issues)        if has_column?(:last_notes)
+
+      issues
+    rescue ::ActiveRecord::StatementInvalid => e
+      raise StatementInvalid.new(e.message)
     end
   end
 end
-

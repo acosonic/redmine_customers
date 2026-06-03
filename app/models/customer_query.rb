@@ -35,20 +35,11 @@ class CustomerQuery < Query
     options[:draw_progress_line] = (arg == '1' ? '1' : nil)
   end
 
-  if Redmine::VERSION::MAJOR >= 4
-    def build_from_params(params, default= {})
-      super
-      self.draw_relations = params[:draw_relations] || (params[:query] && params[:query][:draw_relations])
-      self.draw_progress_line = params[:draw_progress_line] || (params[:query] && params[:query][:draw_progress_line])
-      self
-    end
-  else
-    def build_from_params(params)
-      super
-      self.draw_relations = params[:draw_relations] || (params[:query] && params[:query][:draw_relations])
-      self.draw_progress_line = params[:draw_progress_line] || (params[:query] && params[:query][:draw_progress_line])
-      self
-    end
+  def build_from_params(params, default = {})
+    super
+    self.draw_relations     = params[:draw_relations]     || (params[:query] && params[:query][:draw_relations])
+    self.draw_progress_line = params[:draw_progress_line] || (params[:query] && params[:query][:draw_progress_line])
+    self
   end
 
 

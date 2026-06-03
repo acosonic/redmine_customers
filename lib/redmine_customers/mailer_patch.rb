@@ -1,72 +1,42 @@
-# Taken from RMP Group Watchers plugin and modified for customers needs by
-# Aleksandar Pavic (C) 2017 (LCP Services agency) http://www.lcpgroup.biz
-# Copyright (C) 2015 Kovalevsky Vasil (RMPlus company)
-# Developed by Kovalevsky Vasil by order of "vira realtime"�http://rlt.ru/
+# Based on RMP Group Watchers plugin, modified by Aleksandar Pavic (C) 2017 LCP
+# Original RMP Group Watchers: (C) 2015 Kovalevsky Vasil (RMPlus)
+# Rails 7 port: 2026-06 (Inctime)
+#   - class-method overrides via singleton_class.prepend
+#   - bug fix: `customer.try(:email_id)` was always nil (no such field).
+#     Customer schema has `email`. Switched to `customer.try(:mail)` which
+#     returns `email` (see Customer#mail).
+# GPL
 
 module RedmineCustomers
   module MailerPatch
-    def self.included(base)
-      base.send :include, InstanceMethods
-      base.extend(ClassMethods)
-      base.class_eval do
-        class<<self
-          alias_method :deliver_issue_add_without_customers, :deliver_issue_add
-          alias_method :deliver_issue_add, :deliver_issue_add_with_customers
-
-          alias_method :deliver_issue_edit_without_customers, :deliver_issue_edit
-          alias_method :deliver_issue_edit, :deliver_issue_edit_with_customers
-        end
-      end
-    end
-
     module ClassMethods
-      def deliver_issue_add_with_customers(issue)
-        deliver_issue_add_without_customers(issue)
-        cc = [issue.customer.try(:email_id)]
-        to = []
-        return if cc.empty?
-        if Redmine::VERSION::MAJOR >= 4
-          users = issue.notified_users | issue.notified_watchers
-          users = users & cc
-          users.each do |user|
-            issue_add(user, issue).deliver_later
-          end
-        else
-          issue.each_notification(to + cc) do |users|
-            Mailer.issue_add(issue, to & users, cc & users).deliver
-          end
-        end
+      def deliver_issue_add(issue)
+        super
+        cc_emails = [issue.customer.try(:mail)].compact
+        return if cc_emails.empty?
 
+        users = issue.notified_users | issue.notified_watchers
+        users = users.select { |u| cc_emails.include?(u.mail) }
+        users.each { |user| issue_add(user, issue).deliver_later }
       end
 
-      def deliver_issue_edit_with_customers(journal)
-        deliver_issue_edit_without_customers(journal)
+      def deliver_issue_edit(journal)
+        super
         issue = journal.journalized.reload
-        cc = [issue.customer.try(:email_id)]
-        to = []
-        return if cc.empty?
-        if Redmine::VERSION::MAJOR >= 4
-          users = journal.notified_users | journal.notified_watchers
-          users.select! do |user|
-            journal.notes? || journal.visible_details(user).any?
-          end
-          users.each do |user|
-            Mailer.issue_edit([user] & cc , journal).deliver_later
-          end
-        else
-          journal.each_notification(to + cc) do |users|
-            issue.each_notification(users) do |users2|
-              Mailer.issue_edit(journal, to & users2, cc & users2).deliver
-            end
-          end
+        cc_emails = [issue.customer.try(:mail)].compact
+        return if cc_emails.empty?
 
+        users = journal.notified_users | journal.notified_watchers
+        users.select! { |user| journal.notes? || journal.visible_details(user).any? }
+        users.each do |user|
+          next unless cc_emails.include?(user.mail)
+          Mailer.issue_edit(user, journal).deliver_later
         end
-
       end
     end
 
-    module InstanceMethods
-
+    def self.prepended(base)
+      base.singleton_class.prepend(ClassMethods)
     end
   end
 end

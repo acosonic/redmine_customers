@@ -13,8 +13,15 @@
 require 'date'
 
 class CustomersReportsController < ApplicationController
-  unloadable
-
+  # NOTE (Rails 7 port 2026-06):
+  # - PRE-EXISTING SECURITY BUG: This controller uses string interpolation of
+  #   params into SQL (see runParameterQuery / runQuery). Vulnerable to SQL
+  #   injection. Should be rewritten with parameterized queries before re-use.
+  # - PORTABILITY: Uses MySQL TIMESTAMPDIFF() which does NOT exist in
+  #   PostgreSQL 16. SLA report endpoints will raise ActiveRecord::StatementInvalid
+  #   on the new server. Rewrite with EXTRACT(EPOCH FROM ...) for PG.
+  # - WickedPdf gem may or may not be installed (see Gemfile).
+  # Kept as-is for the AI port pass; refactor in a follow-up.
 
   def index
   end
@@ -29,7 +36,7 @@ class CustomersReportsController < ApplicationController
     Rails.logger.info "Report parameter end_date increased by 1 to fit sql timestampdiff: " + @end_date
 
     # find SLA value
-    sla_field_id = ProjectCustomField.find_by_name("SLA")
+    sla_field_id = ProjectCustomField.find_by(name: "SLA")
 	if(sla_field_id.blank? )
 	  render_error :status => 412, :message => "Project does not have custom field SLA value entered!"
       return false
@@ -102,11 +109,11 @@ class CustomersReportsController < ApplicationController
       end_date    = params[:end_date]
       project_id  = params[:project_id]
       result = ActiveRecord::Base.connection.exec_query(sql + " and created_on > '" + start_date + "' and created_on < '"+ end_date + "' and project_id="+project_id )
-      return result.to_hash
+      return result.to_a
     end
     
     def runQuery(sql)
       result = ActiveRecord::Base.connection.exec_query(sql)
-      return result.to_hash
+      return result.to_a
     end
 end

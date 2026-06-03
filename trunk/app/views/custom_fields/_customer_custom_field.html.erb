@@ -1,7 +1,0 @@
-<p><%= form.check_box :visible %></p>
-<% if @custom_field.format.searchable_supported %>
-    <p><%= form.check_box :searchable %></p>
-<% end %>
-<% if @custom_field.format.is_filter_supported %>
-    <p><%= form.check_box :is_filter %></p>
-<% end %>

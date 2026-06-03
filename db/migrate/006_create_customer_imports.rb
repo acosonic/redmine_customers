@@ -1,4 +1,4 @@
-class CreateCustomerImports < Rails.version < '5.1' ? ActiveRecord::Migration : ActiveRecord::Migration[4.2]
+class CreateCustomerImports < ActiveRecord::Migration[6.0]
   def change
     create_table :customer_imports do |t|
       t.string :url
